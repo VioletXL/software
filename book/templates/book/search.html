@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>搜索图书</title>
+</head>
+<body>
+    <h1>🔍 图书搜索</h1>
+
+    <!-- 搜索框 -->
+    <form method="get" action=".">
+        <input type="text" name="q" value="{{ query }}" placeholder="输入书名搜索...">
+        <button type="submit">搜索</button>
+    </form>
+
+    {% if query %}
+        <h2>搜索 "{{ query }}" 的结果：</h2>
+        {% if books %}
+            <ul>
+            {% for book in books %}
+                <li>{{ book.title }} - {{ book.author }} - ¥{{ book.price }}</li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>没有找到相关图书</p>
+        {% endif %}
+    {% endif %}
+
+    <a href="/">返回首页</a>
+</body>
+</html>
