@@ -215,30 +215,32 @@
             </form>
         </div>
 
-        <!-- 图书列表 -->
-        <div class="books-grid">
-            {% if books %}
-                {% for book in books %}
-                <div class="book-card">
-                    <h3 class="book-title">{{ book.title }}</h3>
-                    <div class="book-author">作者：{{ book.author }}</div>
-                    <div class="book-price">¥{{ book.price }}</div>
-                    <div class="book-meta">
-                        <span>出版日期：{{ book.publish_date }}</span>
-                        <span class="{% if book.is_available %}status-available{% else %}status-unavailable{% endif %}">
-                            {% if book.is_available %}可借阅{% else %}已借出{% endif %}
-                        </span>
-                    </div>
+      <!-- 图书列表 -->
+<div class="books-grid">
+    {% if books %}
+        {% for book in books %}  <!-- 循环仅包含前9本 -->
+            <div class="book-card">
+                <h3 class="book-title">{{ book.title }}</h3>
+                <div class="book-author">作者：{{ book.author }}</div>
+                <!-- 替换原price（已删除）为出版社 -->
+                <div class="book-publisher">出版社：{{ book.publisher }}</div>
+                <!-- 替换原publish_date（已删除）为一级分类 -->
+                <div class="book-category">分类：{{ book.category_level1 }}</div>
+                <!-- 保留是否可借状态 -->
+                <div class="book-status">
+                    <span class="{% if book.is_available %}status-available{% else %}status-unavailable{% endif %}">
+                        {% if book.is_available %}可借阅{% else %}已借出{% endif %}
+                    </span>
                 </div>
-                {% endfor %}
-            {% else %}
-                <div class="empty-state">
-                    <h3>暂无图书数据</h3>
-                    <p>请到管理后台添加图书信息</p>
-                </div>
-            {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <h3>暂无图书数据</h3>
+            <p>请到管理后台添加图书信息</p>
         </div>
-
+    {% endif %}
+</div>
         <!-- 底部 -->
         <div class="footer">
             <p>博厚悠远图书分享系统</p>

@@ -6,11 +6,9 @@ from django.shortcuts import render
 from .models import Book
 
 def home(request):
-    books = Book.objects.all()  # 获取所有图书
-    context = {
-        'books': books
-    }
-    return render(request, 'book/home.html', context)
+    # 修改后：只查询前9本图书
+    books = Book.objects.all()[:9]  # 切片[:9]表示取前9条数据
+    return render(request, 'book/home.html', {'books': books})
 
 # 搜索函数
 def search_books(request):
