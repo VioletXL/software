@@ -1,0 +1,136 @@
+<!-- templates/book/navbar.html -->
+<nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #2c3e50 0%, #4a6491 100%);">
+    <div class="container">
+        <!-- 网站Logo和名称 -->
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <i class="fas fa-book me-2"></i>
+            <span style="font-weight: bold;">博厚悠远</span>
+            <small style="font-size: 0.8rem; opacity: 0.8;">图书分享系统</small>
+        </a>
+
+        <!-- 移动端切换按钮 -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- 导航链接 -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}"
+                       href="{% url 'home' %}">
+                        <i class="fas fa-home me-1"></i>首页
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'search' %}active{% endif %}"
+                       href="{% url 'search' %}">
+                        <i class="fas fa-search me-1"></i>搜索图书
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'recommendations_page' %}active{% endif %}"
+                       href="{% url 'recommendations_page' %}">
+                        <i class="fas fa-heart me-1"></i>猜你喜欢
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal">
+                        <i class="fas fa-info-circle me-1"></i>关于我们
+                    </a>
+                </li>
+            </ul>
+
+            <!-- 用户认证部分 -->
+            <div class="navbar-nav">
+                {% if user.is_authenticated %}
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
+                           id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center"
+                                 style="width: 32px; height: 32px; margin-right: 8px;">
+                                <i class="fas fa-user text-dark" style="font-size: 0.8rem;"></i>
+                            </div>
+                            <span>{{ user.username|truncatechars:15 }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'profile' %}">
+                                    <i class="fas fa-user-circle me-2"></i>个人资料
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'recommendations_page' %}">
+                                    <i class="fas fa-heart me-2"></i>我的推荐
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'logout' %}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>退出登录
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <div class="d-flex">
+                        <a href="{% url 'login' %}" class="btn btn-outline-light me-2">
+                            <i class="fas fa-sign-in-alt me-1"></i>登录
+                        </a>
+                        <a href="{% url 'register' %}" class="btn btn-primary">
+                            <i class="fas fa-user-plus me-1"></i>注册
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- 关于我们模态框 -->
+<div class="modal fade" id="aboutModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-info-circle me-2"></i>关于博厚悠远图书分享系统
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>📚 <strong>博厚悠远</strong> 是一个智能图书分享与推荐平台。</p>
+                <p>✨ <strong>核心功能：</strong></p>
+                <ul>
+                    <li>海量图书资源搜索</li>
+                    <li>个性化智能推荐</li>
+                    <li>在线借阅管理</li>
+                    <li>阅读社区互动</li>
+                </ul>
+                <p>🎯 <strong>我们的使命：</strong></p>
+                <p>让每个人都能轻松找到喜欢的图书，享受阅读的乐趣。</p>
+                <hr>
+                <p class="text-muted small">
+                    <i class="fas fa-code"></i> 技术栈：Django + Bootstrap + LightFM推荐算法
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 消息通知 -->
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <i class="fas
+            {% if message.tags == 'success' %}fa-check-circle
+            {% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle
+            {% elif message.tags == 'warning' %}fa-exclamation-triangle
+            {% else %}fa-info-circle{% endif %}
+            me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}

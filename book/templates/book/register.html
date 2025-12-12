@@ -1,0 +1,111 @@
+<!-- templates/book/register.html -->
+{% extends 'base_auth.html' %}
+{% load static %}
+
+{% block title %}注册 - 图书分享系统{% endblock %}
+
+{% block content %}
+    <!-- 左侧介绍 -->
+    <div class="auth-left">
+        <div class="auth-logo">
+            <i class="fas fa-book"></i>
+            <div>
+                <div>博厚悠远</div>
+                <div style="font-size: 1.2rem; opacity: 0.9;">图书分享系统</div>
+            </div>
+        </div>
+
+        <h2 style="font-size: 1.8rem; margin-bottom: 20px;">加入我们的阅读社区</h2>
+        <p style="opacity: 0.9; line-height: 1.6; margin-bottom: 30px;">
+            发现海量图书，获取个性化推荐，与书友分享阅读心得。开启您的阅读之旅！
+        </p>
+
+        <ul class="features-list">
+            <li><i class="fas fa-check-circle"></i> 个性化图书推荐</li>
+            <li><i class="fas fa-check-circle"></i> 百万图书资源</li>
+            <li><i class="fas fa-check-circle"></i> 智能借阅管理</li>
+            <li><i class="fas fa-check-circle"></i> 阅读社区互动</li>
+            <li><i class="fas fa-check-circle"></i> 跨平台同步</li>
+        </ul>
+    </div>
+
+    <!-- 右侧注册表单 -->
+    <div class="auth-right">
+        <h1 class="auth-title">创建账户</h1>
+        <p class="auth-subtitle">注册账户，开启您的阅读之旅</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label">用户名 *</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="text-danger" style="font-size: 0.875rem; margin-top: 5px;">
+                        {{ form.username.errors }}
+                    </div>
+                {% endif %}
+                <small class="text-muted">4-150个字符，只能包含字母、数字和@/./+/-/_</small>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">邮箱 *</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="text-danger" style="font-size: 0.875rem; margin-top: 5px;">
+                        {{ form.email.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">密码 *</label>
+                {{ form.password1 }}
+                {% if form.password1.errors %}
+                    <div class="text-danger" style="font-size: 0.875rem; margin-top: 5px;">
+                        {{ form.password1.errors }}
+                    </div>
+                {% endif %}
+                <small class="text-muted">
+                    <ul style="padding-left: 20px; margin-top: 5px;">
+                        <li>至少8个字符</li>
+                        <li>不能全是数字</li>
+                        <li>不能与用户名太相似</li>
+                    </ul>
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">确认密码 *</label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                    <div class="text-danger" style="font-size: 0.875rem; margin-top: 5px;">
+                        {{ form.password2.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn-auth">
+                    <i class="fas fa-user-plus"></i> 注册账户
+                </button>
+            </div>
+
+            <div class="auth-link">
+                已有账户？ <a href="{% url 'login' %}">立即登录</a>
+            </div>
+
+            <div class="auth-link" style="margin-top: 10px;">
+                或 <a href="{% url 'home' %}">返回首页</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

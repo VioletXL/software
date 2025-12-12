@@ -1,0 +1,76 @@
+<!-- book/templates/base_auth.html -->
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<style>
+    /* 导航栏样式 */
+    .navbar {
+        background: rgba(255,255,255,0.95);
+        padding: 15px 0;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .navbar-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .navbar-brand {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #667eea;
+        text-decoration: none;
+    }
+
+    .navbar-links a {
+        color: #666;
+        text-decoration: none;
+        margin-left: 15px;
+    }
+
+    .navbar-links a:hover {
+        color: #667eea;
+    }
+
+    .user-info {
+        color: #333;
+        margin-right: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="/" class="navbar-brand">
+                <i class="fas fa-book"></i> 博厚悠远图书分享
+            </a>
+            <div class="navbar-links">
+                {% if user.is_authenticated %}
+                    <span class="user-info">
+                        <i class="fas fa-user"></i> {{ user.username }}
+                    </span>
+                    <a href="{% url 'logout' %}">
+                        <i class="fas fa-sign-out-alt"></i> 退出
+                    </a>
+                {% else %}
+                    <a href="{% url 'login' %}">
+                        <i class="fas fa-sign-in-alt"></i> 登录
+                    </a>
+                    <a href="{% url 'register' %}">
+                        <i class="fas fa-user-plus"></i> 注册
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- 页面具体内容 -->
+    {% block page_content %}{% endblock %}
+{% endblock %}

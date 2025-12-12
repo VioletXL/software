@@ -23,6 +23,12 @@ class Book(models.Model):
     # 保留原模型中的“是否可借”（Excel中没有，用默认值True）
     is_available = models.BooleanField(default=True, verbose_name="是否可借")
 
+    # 添加新字段
+    borrow_count = models.IntegerField(default=0, verbose_name='借阅次数')
+    rating = models.FloatField(default=0.0, verbose_name='评分')
+    cover_url = models.URLField(blank=True, null=True, verbose_name='封面图')
+    description = models.TextField(blank=True, null=True, verbose_name='简介')
+
     def __str__(self):
         return self.title  # 后台显示书名
 

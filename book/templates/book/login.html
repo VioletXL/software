@@ -1,0 +1,108 @@
+<!-- templates/book/login.html -->
+{% extends 'base_auth.html' %}
+{% load static %}
+
+{% block title %}登录 - 图书分享系统{% endblock %}
+
+{% block content %}
+    <!-- 左侧介绍 -->
+    <div class="auth-left">
+        <div class="auth-logo">
+            <i class="fas fa-book"></i>
+            <div>
+                <div>博厚悠远</div>
+                <div style="font-size: 1.2rem; opacity: 0.9;">图书分享系统</div>
+            </div>
+        </div>
+
+        <h2 style="font-size: 1.8rem; margin-bottom: 20px;">欢迎回来</h2>
+        <p style="opacity: 0.9; line-height: 1.6; margin-bottom: 30px;">
+            登录您的账户，继续探索知识的海洋，发现更多精彩图书。
+        </p>
+
+        <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px; margin-top: 30px;">
+            <h4 style="margin-bottom: 15px;">测试账户</h4>
+            <p style="margin-bottom: 5px; font-size: 0.9rem;"><strong>用户名:</strong> demo_user</p>
+            <p style="font-size: 0.9rem;"><strong>密码:</strong> demo1234</p>
+        </div>
+    </div>
+
+    <!-- 右侧登录表单 -->
+    <div class="auth-right">
+        <h1 class="auth-title">登录账户</h1>
+        <p class="auth-subtitle">请输入您的凭证以继续</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label">用户名或邮箱</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="text-danger" style="font-size: 0.875rem; margin-top: 5px;">
+                        {{ form.username.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">密码</label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <div class="text-danger" style="font-size: 0.875rem; margin-top: 5px;">
+                        {{ form.password.errors }}
+                    </div>
+                {% endif %}
+                <div style="text-align: right; margin-top: 5px;">
+                    <a href="#" style="font-size: 0.875rem; color: var(--secondary-color);">忘记密码？</a>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="rememberMe" name="remember_me">
+                    <label class="form-check-label" for="rememberMe">记住我</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn-auth">
+                    <i class="fas fa-sign-in-alt"></i> 登录账户
+                </button>
+            </div>
+
+            <div class="auth-link">
+                还没有账户？ <a href="{% url 'register' %}">立即注册</a>
+            </div>
+
+            <div class="auth-link" style="margin-top: 10px;">
+                或 <a href="{% url 'home' %}">以游客身份浏览</a>
+            </div>
+
+            <!-- 社交登录（可选） -->
+            <div style="text-align: center; margin-top: 30px; position: relative;">
+                <hr style="border-color: #eee;">
+                <span style="background: white; padding: 0 15px; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); color: #666;">
+                    或使用其他方式登录
+                </span>
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                <button type="button" class="btn" style="flex: 1; border: 2px solid #ddd; background: white; padding: 10px; border-radius: 10px;">
+                    <i class="fab fa-google" style="color: #DB4437;"></i> Google
+                </button>
+                <button type="button" class="btn" style="flex: 1; border: 2px solid #ddd; background: white; padding: 10px; border-radius: 10px;">
+                    <i class="fab fa-github" style="color: #333;"></i> GitHub
+                </button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

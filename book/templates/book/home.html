@@ -1,204 +1,233 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>博厚悠远 - 分享图书</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<!-- 在文件开头添加 -->
+{% extends 'base.html' %}
 
-        body {
-            font-family: "Microsoft YaHei", "SimHei", sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
+{% block title %}首页 - 博厚悠远图书分享系统{% endblock %}
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+{% block extra_css %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-        /* 头部样式 */
-        .header {
-            text-align: center;
-            padding: 40px 0;
-            color: white;
-        }
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
 
-        .brand-title {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
+    /* 头部样式 */
+    .header {
+        text-align: center;
+        padding: 40px 0;
+        color: white;
+    }
 
-        .brand-subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            margin-bottom: 5px;
-        }
+    .brand-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
 
-        .brand-english {
-            font-size: 1rem;
-            opacity: 0.8;
-            font-style: italic;
-        }
+    .brand-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 5px;
+    }
 
-        /* 搜索框样式 */
-        .search-section {
-            background: rgba(255,255,255,0.95);
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        }
+    .brand-english {
+        font-size: 1rem;
+        opacity: 0.8;
+        font-style: italic;
+    }
 
-        .search-form {
-            display: flex;
-            gap: 10px;
-            max-width: 500px;
-            margin: 0 auto;
-        }
+    /* 搜索框样式 */
+    .search-section {
+        background: rgba(255,255,255,0.95);
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
 
-        .search-input {
-            flex: 1;
-            padding: 12px 20px;
-            border: 2px solid #667eea;
-            border-radius: 25px;
-            font-size: 16px;
-            outline: none;
-            transition: all 0.3s ease;
-        }
+    .search-form {
+        display: flex;
+        gap: 10px;
+        max-width: 500px;
+        margin: 0 auto;
+    }
 
-        .search-input:focus {
-            border-color: #764ba2;
-            box-shadow: 0 0 10px rgba(118, 75, 162, 0.3);
-        }
+    .search-input {
+        flex: 1;
+        padding: 12px 20px;
+        border: 2px solid #667eea;
+        border-radius: 25px;
+        font-size: 16px;
+        outline: none;
+        transition: all 0.3s ease;
+    }
 
-        .search-btn {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
+    .search-input:focus {
+        border-color: #764ba2;
+        box-shadow: 0 0 10px rgba(118, 75, 162, 0.3);
+    }
 
-        .search-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
+    .search-btn, .like-btn {
+        padding: 12px 30px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-        /* 图书网格样式 */
-        .books-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
+    .search-btn:hover, .like-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
 
-        .book-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
+    /* 图书网格样式 */
+    .books-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
 
-        .book-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-        }
+    .book-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
 
-        .book-title {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 8px;
-            line-height: 1.4;
-        }
+    .book-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
 
-        .book-author {
-            color: #7f8c8d;
-            font-size: 1rem;
-            margin-bottom: 10px;
-        }
+    .book-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        line-height: 1.4;
+    }
 
-        .book-price {
-            color: #e74c3c;
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
+    .book-author {
+        color: #7f8c8d;
+        font-size: 1rem;
+        margin-bottom: 10px;
+    }
 
-        .book-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.9rem;
-            color: #95a5a6;
-        }
+    .book-publisher, .book-category {
+        color: #5d6d7e;
+        font-size: 0.95rem;
+        margin-bottom: 8px;
+    }
 
-        .status-available {
-            color: #27ae60;
-            font-weight: bold;
-        }
+    .book-status {
+        margin-top: 15px;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+    }
 
-        .status-unavailable {
-            color: #e74c3c;
-            font-weight: bold;
-        }
+    .status-available {
+        color: #27ae60;
+        font-weight: bold;
+    }
 
-        /* 底部样式 */
-        .footer {
-            text-align: center;
-            padding: 30px 0;
-            color: white;
-            opacity: 0.8;
-        }
+    .status-unavailable {
+        color: #e74c3c;
+        font-weight: bold;
+    }
 
-        .admin-link {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 10px 25px;
-            background: rgba(255,255,255,0.2);
-            color: white;
-            text-decoration: none;
-            border-radius: 20px;
-            transition: all 0.3s ease;
-        }
+    /* 底部样式 */
+    .footer {
+        text-align: center;
+        padding: 30px 0;
+        color: white;
+        opacity: 0.8;
+    }
 
-        .admin-link:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateY(-2px);
-        }
+    .admin-link {
+        display: inline-block;
+        margin-top: 15px;
+        padding: 10px 25px;
+        background: rgba(255,255,255,0.2);
+        color: white;
+        text-decoration: none;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
 
-        /* 空状态样式 */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            background: white;
-            border-radius: 15px;
-            color: #7f8c8d;
-        }
+    .admin-link:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+    }
 
-        .empty-state h3 {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            color: #2c3e50;
-        }
-    </style>
-</head>
-<body>
+    /* 空状态样式 */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 15px;
+        color: #7f8c8d;
+        grid-column: 1 / -1;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        color: #2c3e50;
+    }
+
+    /* 推荐展示区域 */
+    .recommendations-section {
+        background: rgba(255,255,255,0.95);
+        padding: 30px;
+        border-radius: 15px;
+        margin: 30px 0;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        display: none;
+    }
+
+    .recommendations-section h3 {
+        text-align: center;
+        margin-bottom: 25px;
+        color: #2c3e50;
+        font-size: 1.5rem;
+    }
+
+    /* 推荐图书卡片特殊样式 */
+    .recommendations-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    .recommendation-card {
+        border-left: 4px solid #667eea;
+    }
+
+    .recommendation-icon {
+        font-size: 20px;
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
     <div class="container">
         <!-- 头部品牌信息 -->
         <div class="header">
@@ -209,43 +238,262 @@
 
         <!-- 搜索区域 -->
         <div class="search-section">
-            <form method="get" action="/search/" class="search-form">
+            <form method="get" action="/search/" class="search-form" id="search-form">
                 <input type="text" name="q" class="search-input" placeholder="搜索图书名称、作者...">
                 <button type="submit" class="search-btn">搜索</button>
+                <button type="button" class="like-btn" id="guess-like-btn">
+                    <span class="recommendation-icon">❤️</span> 猜你喜欢
+                </button>
             </form>
         </div>
 
-      <!-- 图书列表 -->
-<div class="books-grid">
-    {% if books %}
-        {% for book in books %}  <!-- 循环仅包含前9本 -->
-            <div class="book-card">
-                <h3 class="book-title">{{ book.title }}</h3>
-                <div class="book-author">作者：{{ book.author }}</div>
-                <!-- 替换原price（已删除）为出版社 -->
-                <div class="book-publisher">出版社：{{ book.publisher }}</div>
-                <!-- 替换原publish_date（已删除）为一级分类 -->
-                <div class="book-category">分类：{{ book.category_level1 }}</div>
-                <!-- 保留是否可借状态 -->
-                <div class="book-status">
-                    <span class="{% if book.is_available %}status-available{% else %}status-unavailable{% endif %}">
-                        {% if book.is_available %}可借阅{% else %}已借出{% endif %}
-                    </span>
+        <!-- 图书列表 -->
+        <div class="books-grid">
+        {% if books %}
+            {% for book in books %}
+                <div class="book-card">
+                    <h3 class="book-title">{{ book.title }}</h3>
+                    <div class="book-author">作者：{{ book.author }}</div>
+                    <div class="book-publisher">出版社：{{ book.publisher }}</div>
+                    <div class="book-category">分类：{{ book.category_level1 }}</div>
+                    <div class="book-status">
+                        <span class="{% if book.is_available %}status-available{% else %}status-unavailable{% endif %}">
+                            {% if book.is_available %}可借阅{% else %}已借出{% endif %}
+                        </span>
+                    </div>
                 </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <h3>暂无图书数据</h3>
+                <p>请到管理后台添加图书信息</p>
             </div>
-        {% endfor %}
-    {% else %}
-        <div class="empty-state">
-            <h3>暂无图书数据</h3>
-            <p>请到管理后台添加图书信息</p>
+        {% endif %}
         </div>
-    {% endif %}
-</div>
+
+        <!-- 推荐展示区域 -->
+        <div class="recommendations-section" id="recommendations-section">
+            <h3>猜你喜欢</h3>
+            <div id="recommendations-container">
+                <p id="loading-text" style="text-align: center; color: #666;">正在为您生成个性化推荐...</p>
+                <div id="recommendations-list" class="recommendations-list"></div>
+            </div>
+        </div>
+
         <!-- 底部 -->
         <div class="footer">
             <p>博厚悠远图书分享系统</p>
             <a href="/admin/" class="admin-link">进入管理后台</a>
         </div>
     </div>
-</body>
-</html>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 页面加载完成后执行
+document.addEventListener('DOMContentLoaded', function() {
+    // 获取猜你喜欢按钮
+    const guessLikeBtn = document.getElementById('guess-like-btn');
+    const recommendationsSection = document.getElementById('recommendations-section');
+
+    // 给按钮添加点击事件
+    if (guessLikeBtn) {
+        guessLikeBtn.addEventListener('click', function(e) {
+            e.preventDefault(); // 阻止默认行为
+
+            // 切换推荐区域显示/隐藏
+            if (recommendationsSection.style.display === 'none' || recommendationsSection.style.display === '') {
+                recommendationsSection.style.display = 'block';
+                // 如果还没加载过，就获取推荐
+                if (document.getElementById('recommendations-list').children.length === 0) {
+                    getRecommendations();
+                }
+            } else {
+                recommendationsSection.style.display = 'none';
+            }
+        });
+    }
+});
+
+// 获取推荐数据
+async function getRecommendations() {
+    try {
+        // 获取用户ID（根据你的项目实际情况调整）
+        let userId = 'user_001'; // 默认用户ID
+
+        // 如果是Django项目，可以从模板获取用户信息
+        {% if user and user.is_authenticated %}
+        userId = '{{ user.id }}';
+        {% endif %}
+
+        // 或者从localStorage获取
+        const storedUserId = localStorage.getItem('user_id');
+        if (storedUserId) {
+            userId = storedUserId;
+        }
+
+        // 显示加载状态
+        document.getElementById('loading-text').textContent = '正在为您生成个性化推荐...';
+
+        // 调用推荐API
+        const response = await fetch('/api/recommend/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken(), // Django需要CSRF token
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                top_n: 6 // 推荐6本书
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`请求失败: ${response.status}`);
+        }
+
+        const data = await response.json();
+        displayRecommendations(data.recommendations || data.books || []);
+
+    } catch (error) {
+        console.error('获取推荐失败:', error);
+        document.getElementById('loading-text').textContent = '推荐加载失败，请稍后再试';
+        document.getElementById('loading-text').style.color = '#dc3545';
+    }
+}
+
+// 显示推荐结果
+function displayRecommendations(books) {
+    const container = document.getElementById('recommendations-list');
+    const loadingText = document.getElementById('loading-text');
+
+    if (!books || books.length === 0) {
+        loadingText.textContent = '暂无推荐，请先浏览一些图书或登录账户';
+        loadingText.style.color = '#6c757d';
+        return;
+    }
+
+    // 隐藏加载文本
+    loadingText.style.display = 'none';
+
+    // 清空容器
+    container.innerHTML = '';
+
+    // 生成图书卡片
+    books.forEach(book => {
+        const bookCard = document.createElement('div');
+        bookCard.className = 'book-card recommendation-card';
+
+        // 构建描述，限制长度
+        let description = book.description || '';
+        if (description.length > 80) {
+            description = description.substring(0, 77) + '...';
+        }
+
+        // 确定卡片颜色（根据分类）
+        let categoryColor = '#667eea'; // 默认蓝色
+        let categoryIcon = '📚';
+
+        if (book.category && book.category.includes('马克思主义')) {
+            categoryColor = '#dc3545'; // 红色
+            categoryIcon = '📖';
+        } else if (book.category && book.category.includes('计算机')) {
+            categoryColor = '#28a745'; // 绿色
+            categoryIcon = '💻';
+        }
+
+        bookCard.innerHTML = `
+            <div style="border-left: 4px solid ${categoryColor}; padding-left: 15px;">
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 24px; margin-right: 10px;">${categoryIcon}</span>
+                    <h3 class="book-title" style="margin: 0; color: ${categoryColor};">${book.title || '未知书名'}</h3>
+                </div>
+
+                <div class="book-author">作者：${book.author || '未知作者'}</div>
+                <div class="book-publisher">出版社：${book.publisher || '未知出版社'}</div>
+                ${book.category ? `<div class="book-category">分类：${book.category}</div>` : ''}
+
+                ${description ? `
+                    <div style="margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 8px; font-size: 0.9rem; color: #666;">
+                        ${description}
+                    </div>
+                ` : ''}
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                    <div class="book-status">
+                        <span class="${book.status === '可借阅' ? 'status-available' : 'status-unavailable'}">
+                            ${book.status === '可借阅' ? '✅ 可借阅' : '❌ 已借出'}
+                        </span>
+                    </div>
+
+                    <button onclick="borrowBook('${book.id || book.book_id || ''}', '${(book.title || '').replace(/'/g, "\\'")}')"
+                            style="padding: 8px 20px; background: ${book.status === '可借阅' ? categoryColor : '#6c757d'};
+                                   color: white; border: none; border-radius: 25px; cursor: ${book.status === '可借阅' ? 'pointer' : 'not-allowed'};"
+                            ${book.status !== '可借阅' ? 'disabled' : ''}>
+                        ${book.status === '可借阅' ? '立即借阅' : '不可借'}
+                    </button>
+                </div>
+            </div>
+        `;
+        container.appendChild(bookCard);
+    });
+}
+
+// 获取CSRF token（Django需要）
+function getCsrfToken() {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfToken) {
+        return csrfToken.value;
+    }
+
+    const cookieValue = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrftoken='))
+        ?.split('=')[1];
+    return cookieValue || '';
+}
+
+// 借阅功能
+function borrowBook(bookId, bookTitle) {
+    if (!bookId) {
+        alert('图书ID无效');
+        return;
+    }
+
+    if (!confirm(`确定要借阅《${bookTitle}》吗？`)) {
+        return;
+    }
+
+    fetch('/api/book/borrow/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(),
+        },
+        body: JSON.stringify({
+            book_id: bookId,
+            book_title: bookTitle
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP错误: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert(`成功借阅《${bookTitle}》！`);
+            // 刷新推荐列表
+            getRecommendations();
+        } else {
+            alert(`借阅失败: ${data.message || '未知错误'}`);
+        }
+    })
+    .catch(error => {
+        console.error('借阅请求失败:', error);
+        alert('借阅请求失败，请稍后再试');
+    });
+}
+</script>
+{% endblock %}
