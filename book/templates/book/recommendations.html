@@ -258,6 +258,11 @@
 </style>
 {% endblock %}
 
+
+
+
+
+
 {% block content %}
 <div class="container">
     <div class="header">
@@ -300,6 +305,13 @@
     </div>
 </div>
 {% endblock %}
+
+
+
+
+
+
+
 
 {% block extra_js %}
 <script>
@@ -439,7 +451,7 @@
                         </div>
                     </div>
 
-                    <button onclick="borrowBook('${safeBookId}', '${safeBookTitle}')"
+                    <button onclick="borrowBook('${book.id || book.book_id || ''}', '${safeBookTitle}', ${!book.id})"
                             class="borrow-btn"
                             ${book.status !== '可借阅' ? 'disabled' : ''}>
                         <i class="fas fa-book-reader"></i> ${book.status === '可借阅' ? '立即借阅' : '不可借'}
@@ -464,51 +476,84 @@
         }, 500);
     }
 
-    // 借阅图书
-    function borrowBook(bookId, bookTitle) {
-        if (!bookId || !bookTitle) {
-            alert('图书信息不完整');
-            return;
-        }
-
-        if (!confirm(`确定要借阅《${bookTitle}》吗？`)) {
-            return;
-        }
-
-        // 检查用户是否登录
-        {% if not user.is_authenticated %}
+    // 修改后的借阅函数 - 处理数字ID和备用ID
+function borrowBook(bookId, bookTitle, isFallback = false) {
+    // 检查用户是否登录
+    {% if not user.is_authenticated %}
         alert('请先登录后再借阅图书');
         window.location.href = '{% url "login" %}?next={{ request.path }}';
         return;
-        {% endif %}
+    {% endif %}
 
-        // 调用借阅API
-        fetch('{% url "book_borrow" %}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCsrfToken(),
-            },
-            body: JSON.stringify({
-                book_id: bookId,
-                book_title: bookTitle
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(`成功借阅《${bookTitle}》！`);
-                // 刷新推荐列表
-                refreshRecommendations();
-            } else {
-                alert(`借阅失败: ${data.message}`);
-            }
-        })
-        .catch(error => {
-            console.error('借阅请求失败:', error);
-            alert('借阅请求失败，请稍后再试');
-        });
+    if (!bookId) {
+        alert('图书信息不完整');
+        return;
     }
+
+    if (!confirm(`确定要借阅《${bookTitle}》吗？`)) {
+        return;
+    }
+
+    // 处理备用数据（fallback数据）
+    if (isFallback || bookId.startsWith('fallback_')) {
+        alert('这是演示数据，无法实际借阅。请尝试借阅真实图书。');
+        return;
+    }
+
+    // 确保bookId是数字
+    const numericId = parseInt(bookId);
+    if (isNaN(numericId)) {
+        alert('图书ID格式错误');
+        return;
+    }
+
+    // 显示加载状态
+    const btn = document.querySelector(`[data-book-id="${bookId}"]`);
+    if (btn) {
+        const originalText = btn.textContent;
+        btn.textContent = '处理中...';
+        btn.disabled = true;
+    }
+
+    // 调用借阅API
+    fetch('{% url "book_borrow" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(),
+        },
+        body: JSON.stringify({
+            book_id: numericId,  // 使用数字ID
+            book_title: bookTitle
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP错误: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert(`成功借阅《${bookTitle}》！`);
+            // 刷新推荐列表
+            refreshRecommendations();
+        } else {
+            alert(`借阅失败: ${data.message}`);
+        }
+    })
+    .catch(error => {
+        console.error('借阅请求失败:', error);
+        alert('借阅请求失败，请稍后再试');
+    })
+    .finally(() => {
+        // 恢复按钮状态
+        if (btn) {
+            btn.textContent = '立即借阅';
+            btn.disabled = false;
+        }
+    });
+}
 
     // 获取CSRF token
     function getCsrfToken() {

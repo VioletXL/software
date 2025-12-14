@@ -55,7 +55,7 @@
     .search-form {
         display: flex;
         gap: 10px;
-        max-width: 500px;
+        max-width: 800px;
         margin: 0 auto;
     }
 
@@ -192,38 +192,6 @@
         color: #2c3e50;
     }
 
-    /* 推荐展示区域 */
-    .recommendations-section {
-        background: rgba(255,255,255,0.95);
-        padding: 30px;
-        border-radius: 15px;
-        margin: 30px 0;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        display: none;
-    }
-
-    .recommendations-section h3 {
-        text-align: center;
-        margin-bottom: 25px;
-        color: #2c3e50;
-        font-size: 1.5rem;
-    }
-
-    /* 推荐图书卡片特殊样式 */
-    .recommendations-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 20px;
-    }
-
-    .recommendation-card {
-        border-left: 4px solid #667eea;
-    }
-
-    .recommendation-icon {
-        font-size: 20px;
-        margin-right: 8px;
-    }
 </style>
 {% endblock %}
 
@@ -241,44 +209,66 @@
             <form method="get" action="/search/" class="search-form" id="search-form">
                 <input type="text" name="q" class="search-input" placeholder="搜索图书名称、作者...">
                 <button type="submit" class="search-btn">搜索</button>
-                <button type="button" class="like-btn" id="guess-like-btn">
-                    <span class="recommendation-icon">❤️</span> 猜你喜欢
-                </button>
+                <a href="{% url 'recommendations' %}" class="like-btn" target="_blank">猜你喜欢</a>
+                <a href="{% url 'login' %}" class="like-btn" target="_blank">登录</a>
+
             </form>
         </div>
 
-        <!-- 图书列表 -->
-        <div class="books-grid">
-        {% if books %}
-            {% for book in books %}
-                <div class="book-card">
-                    <h3 class="book-title">{{ book.title }}</h3>
-                    <div class="book-author">作者：{{ book.author }}</div>
-                    <div class="book-publisher">出版社：{{ book.publisher }}</div>
-                    <div class="book-category">分类：{{ book.category_level1 }}</div>
-                    <div class="book-status">
-                        <span class="{% if book.is_available %}status-available{% else %}status-unavailable{% endif %}">
-                            {% if book.is_available %}可借阅{% else %}已借出{% endif %}
-                        </span>
-                    </div>
-                </div>
-            {% endfor %}
-        {% else %}
-            <div class="empty-state">
-                <h3>暂无图书数据</h3>
-                <p>请到管理后台添加图书信息</p>
+<!-- 图书列表 -->
+<div class="books-grid">
+{% if books %}
+    {% for book in books %}
+        <div class="book-card">
+            <!-- 图书信息部分 -->
+            <div class="book-info">
+                <h3 class="book-title">{{ book.title }}</h3>
+                <div class="book-author">作者：{{ book.author }}</div>
+                <div class="book-publisher">出版社：{{ book.publisher }}</div>
+                <div class="book-category">分类：{{ book.category_level1 }}</div>
             </div>
-        {% endif %}
-        </div>
 
-        <!-- 推荐展示区域 -->
-        <div class="recommendations-section" id="recommendations-section">
-            <h3>猜你喜欢</h3>
-            <div id="recommendations-container">
-                <p id="loading-text" style="text-align: center; color: #666;">正在为您生成个性化推荐...</p>
-                <div id="recommendations-list" class="recommendations-list"></div>
+            <!-- 底部区域：状态和按钮 -->
+            <div class="book-footer">
+                <div class="book-status">
+                    <span class="{% if book.is_available %}status-available{% else %}status-unavailable{% endif %}">
+                        {% if book.is_available %}可借阅{% else %}已借出{% endif %}
+                    </span>
+                </div>
+
+                <!-- 借阅按钮 -->
+                <div class="borrow-action">
+                    {% if book.is_available %}
+                        <button class="borrow-btn"
+                                onclick="borrowBook('{{ book.id }}', '{{ book.title|escapejs }}')"
+                                data-book-id="{{ book.id }}">
+                            立即借阅
+                        </button>
+                    {% else %}
+                        {% if book.current_borrower == user %}
+                            <button class="return-btn"
+                                    onclick="returnBook('{{ book.id }}')"
+                                    data-book-id="{{ book.id }}">
+                                归还图书
+                            </button>
+                        {% else %}
+                            <button class="borrowed-btn" disabled>
+                                已借出
+                            </button>
+                        {% endif %}
+                    {% endif %}
+                </div>
             </div>
         </div>
+    {% endfor %}
+{% else %}
+    <div class="empty-state">
+        <h3>暂无图书数据</h3>
+        <p>请到管理后台添加图书信息</p>
+    </div>
+{% endif %}
+</div>
+
 
         <!-- 底部 -->
         <div class="footer">
@@ -287,6 +277,12 @@
         </div>
     </div>
 {% endblock %}
+
+
+
+
+
+
 
 {% block extra_js %}
 <script>
@@ -453,8 +449,15 @@ function getCsrfToken() {
     return cookieValue || '';
 }
 
-// 借阅功能
+// 借阅功能 - 针对首页图书
 function borrowBook(bookId, bookTitle) {
+    // 检查用户是否登录
+    {% if not user.is_authenticated %}
+        alert('请先登录后再借阅图书');
+        window.location.href = '{% url "login" %}?next={{ request.path }}';
+        return;
+    {% endif %}
+
     if (!bookId) {
         alert('图书ID无效');
         return;
@@ -464,7 +467,16 @@ function borrowBook(bookId, bookTitle) {
         return;
     }
 
-    fetch('/api/book/borrow/', {
+    // 显示加载状态
+    const btn = document.querySelector(`[data-book-id="${bookId}"]`);
+    if (btn) {
+        const originalText = btn.textContent;
+        btn.textContent = '处理中...';
+        btn.disabled = true;
+    }
+
+    // 修正API路径：使用你的实际借阅API路径
+    fetch('{% url "book_borrow" %}', {  // 确保urls.py中有这个路由
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -484,15 +496,27 @@ function borrowBook(bookId, bookTitle) {
     .then(data => {
         if (data.success) {
             alert(`成功借阅《${bookTitle}》！`);
-            // 刷新推荐列表
-            getRecommendations();
+            // 刷新当前页面，更新借阅状态
+            setTimeout(() => {
+                location.reload();
+            }, 500);
         } else {
             alert(`借阅失败: ${data.message || '未知错误'}`);
+            // 恢复按钮状态
+            if (btn) {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
         }
     })
     .catch(error => {
         console.error('借阅请求失败:', error);
         alert('借阅请求失败，请稍后再试');
+        // 恢复按钮状态
+        if (btn) {
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
     });
 }
 </script>

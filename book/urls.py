@@ -4,7 +4,7 @@ from . import views
 
 urlpatterns = [
     # 基础页面
-    path('', views.home, name='home'),
+
     path('login/', views.login_view, name='login'),
     path('register/', views.register_view, name='register'),
     path('logout/', views.logout_view, name='logout'),
@@ -16,4 +16,16 @@ urlpatterns = [
 
     # API端点
     path('api/recommend/', views.recommend_api, name='api_recommend'),
+
+
+
+    path('book/borrow/', views.borrow_book, name='book_borrow'),
+path('my-borrows/', views.my_borrow_records, name='my_borrows'),
+    path('book/return/<int:book_id>/', views.return_book, name='return_book'),
+
+
+
+
+
+path('', views.home, name='home'),
 ]

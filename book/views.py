@@ -1,4 +1,5 @@
 # book/views.py
+from django.db.models import Count
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -8,6 +9,35 @@ from django.contrib import messages
 import json
 from .models import Book
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
+import os
+
+# 尝试导入推荐服务
+try:
+    from .recommendation_service import recommender, initialize_recommender
+
+    # 检查模型文件是否存在
+    model_files_exist = os.path.exists('lightfm_model.npz') and os.path.exists('lightfm_model.mappings.json')
+
+    if model_files_exist:
+        print("检测到模型文件，正在初始化推荐系统...")
+        try:
+            initialize_recommender()
+            RECOMMENDER_AVAILABLE = True
+            print("推荐系统初始化成功")
+        except Exception as e:
+            print(f"推荐系统初始化失败: {e}")
+            RECOMMENDER_AVAILABLE = False
+    else:
+        print("未找到模型文件，推荐系统不可用")
+        RECOMMENDER_AVAILABLE = False
+
+except ImportError as e:
+    print(f"无法导入推荐服务: {e}")
+    RECOMMENDER_AVAILABLE = False
+except Exception as e:
+    print(f"推荐系统初始化异常: {e}")
+    RECOMMENDER_AVAILABLE = False
+
 
 
 # 首页视图
@@ -28,6 +58,7 @@ def search_books(request):
 
 
 # 推荐API接口
+# 推荐API接口
 @csrf_exempt
 def recommend_api(request):
     """推荐API接口"""
@@ -39,19 +70,63 @@ def recommend_api(request):
 
             print(f"收到推荐请求 - 用户: {user_id}, 数量: {top_n}")
 
-            # 方法1：按借阅次数降序（最热门）
-            books = Book.objects.filter(is_available=True).order_by('-borrow_count')[:top_n]
+            # 如果是已登录用户且推荐系统可用，使用模型推荐
+            if user_id != 'anonymous' and RECOMMENDER_AVAILABLE:
+                try:
+                    # 尝试将用户ID转换为整数
+                    try:
+                        user_id_int = int(user_id)
+                    except:
+                        user_id_int = user_id
 
-            # 如果热门图书不够，补充随机图书
-            if books.count() < top_n:
-                remaining = top_n - books.count()
-                extra_books = Book.objects.filter(
-                    is_available=True
-                ).exclude(
-                    id__in=[b.id for b in books]
-                ).order_by('?')[:remaining]
-                books = list(books) + list(extra_books)
+                    recommended_book_id = recommender.recommend(user_id_int)
 
+                    if recommended_book_id:
+                        try:
+                            # 获取推荐图书
+                            recommended_book = Book.objects.get(book_id=recommended_book_id)
+                            # 基于推荐图书获取相似图书
+                            from django.db.models import Q
+                            similar_books = Book.objects.filter(
+                                Q(category_level1=recommended_book.category_level1) |
+                                Q(category_level2=recommended_book.category_level2) |
+                                Q(author=recommended_book.author)
+                            ).exclude(id=recommended_book.id).distinct()[:top_n - 1]
+
+                            books = [recommended_book] + list(similar_books)
+
+                            # 如果不够，用热门书籍补充
+                            if len(books) < top_n:
+                                remaining = top_n - len(books)
+                                popular_books = Book.objects.annotate(
+                                    borrow_count=Count('borrowrecord')
+                                ).order_by('-borrow_count')[:remaining]
+                                books.extend(popular_books)
+
+                        except Book.DoesNotExist:
+                            # 推荐图书不存在，回退到热门书籍
+                            books = Book.objects.annotate(
+                                borrow_count=Count('borrowrecord')
+                            ).order_by('-borrow_count')[:top_n]
+                    else:
+                        # 模型没有推荐结果，使用热门书籍
+                        books = Book.objects.annotate(
+                            borrow_count=Count('borrowrecord')
+                        ).order_by('-borrow_count')[:top_n]
+
+                except Exception as e:
+                    print(f"模型推荐失败: {e}")
+                    # 出错时使用热门书籍
+                    books = Book.objects.annotate(
+                        borrow_count=Count('borrowrecord')
+                    ).order_by('-borrow_count')[:top_n]
+            else:
+                # 未登录用户或推荐系统不可用，使用热门书籍
+                books = Book.objects.annotate(
+                    borrow_count=Count('borrowrecord')
+                ).order_by('-borrow_count')[:top_n]
+
+            # 构建返回数据
             book_list = []
             for book in books:
                 # 确定分类显示
@@ -79,7 +154,8 @@ def recommend_api(request):
                     'rating': rating_text,
                     'description': book.description or '',
                     'borrow_count': book.borrow_count,
-                    'book_id': book.book_id or str(book.id)
+                    'book_id': book.book_id or str(book.id),
+                    'id': book.id
                 })
 
             print(f"成功返回 {len(book_list)} 条推荐")
@@ -87,7 +163,8 @@ def recommend_api(request):
             return JsonResponse({
                 'success': True,
                 'user_id': user_id,
-                'recommendations': book_list
+                'recommendations': book_list,
+                'model_used': RECOMMENDER_AVAILABLE and user_id != 'anonymous'
             })
 
         except Exception as e:
@@ -95,15 +172,41 @@ def recommend_api(request):
             import traceback
             traceback.print_exc()
 
-            # 返回示例数据作为备用
+            # 返回真实的备选推荐数据
             return JsonResponse({
                 'success': True,
                 'user_id': user_id,
-                'recommendations': get_fallback_recommendations(top_n)
+                'recommendations': get_fallback_recommendations(top_n),
+                'model_used': False
             })
 
     return JsonResponse({'error': '只支持POST'}, status=405)
 
+
+def get_category_recommendations(user, num_books=9):
+    """基于用户分类偏好的推荐"""
+    # 获取用户借阅过的分类
+    borrows = BorrowRecord.objects.filter(user=user).select_related('book')
+    categories = set()
+
+    for borrow in borrows:
+        if borrow.book.category_level1:
+            categories.add(borrow.book.category_level1)
+        if borrow.book.category_level2:
+            categories.add(borrow.book.category_level2)
+
+    if categories:
+        # 从用户偏好的分类中推荐书籍
+        from django.db.models import Q
+        return Book.objects.filter(
+            Q(category_level1__in=categories) |
+            Q(category_level2__in=categories)
+        ).distinct()[:num_books]
+    else:
+        # 如果用户没有借阅历史，显示热门书籍
+        return Book.objects.annotate(
+            borrow_count=Count('borrowrecord')
+        ).order_by('-borrow_count')[:num_books]
 
 def get_fallback_recommendations(n):
     """备选推荐数据"""
@@ -213,7 +316,7 @@ def login_view(request):
 def logout_view(request):
     """用户登出视图"""
     logout(request)
-    messages.success(request, '您已成功登出。')
+    messages.success(request, '您已成功退出。')
     return redirect('home')
 
 
@@ -224,3 +327,84 @@ def profile_view(request):
     user = request.user
     # 这里可以添加用户的借阅记录、收藏等信息
     return render(request, 'book/profile.html', {'user': user})
+
+
+from django.shortcuts import get_object_or_404
+from .models import Book, BorrowRecord
+@csrf_exempt
+@login_required
+def borrow_book(request):
+    """处理借阅请求的API"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            book_id = data.get('book_id')
+            book_title = data.get('book_title')
+
+            # 通过ID或标题查找图书
+            if book_id:
+                book = get_object_or_404(Book, id=book_id)
+            elif book_title:
+                book = get_object_or_404(Book, title=book_title)
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'message': '请提供图书ID或书名'
+                }, status=400)
+
+            # 检查图书是否可借
+            if not book.is_available:
+                return JsonResponse({
+                    'success': False,
+                    'message': '该图书已被借出'
+                })
+
+            # 执行借阅
+            if book.borrow(request.user):
+                return JsonResponse({
+                    'success': True,
+                    'message': f'成功借阅《{book.title}》',
+                    'book_id': book.id,
+                    'book_title': book.title
+                })
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'message': '借阅失败'
+                })
+
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'服务器错误: {str(e)}'
+            }, status=500)
+
+    return JsonResponse({'error': '只支持POST请求'}, status=405)
+
+
+@login_required
+def my_borrow_records(request):
+    """查看我的借阅记录"""
+    borrow_records = BorrowRecord.objects.filter(user=request.user).select_related('book')
+
+    context = {
+        'borrow_records': borrow_records,
+        'current_borrows': borrow_records.filter(return_date__isnull=True),
+        'history_borrows': borrow_records.filter(return_date__isnull=False),
+    }
+    return render(request, 'book/my_borrows.html', context)
+
+
+@login_required
+def return_book(request, book_id):
+    """归还图书"""
+    book = get_object_or_404(Book, id=book_id)
+
+    # 检查是否是当前借阅者
+    if book.current_borrower != request.user:
+        messages.error(request, '您没有借阅此图书')
+        return redirect('my_borrow_records')
+
+    book.return_book()
+    messages.success(request, f'已归还《{book.title}》')
+    return redirect('my_borrow_records')
