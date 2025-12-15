@@ -19,7 +19,7 @@ class BookConfig(AppConfig):
             try:
                 # 检查模型文件是否存在
                 model_files_exist = os.path.exists('lightfm_model.npz') and os.path.exists(
-                    'lightfm_model.mappings.json')
+                    'lightfm_model_mappings.json')
 
                 if model_files_exist:
                     print("检测到模型文件，正在初始化推荐系统...")

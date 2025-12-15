@@ -4,211 +4,183 @@
 
 {% block extra_css %}
 <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
     .container {
         max-width: 1200px;
         margin: 0 auto;
         padding: 20px;
+        min-height: calc(100vh - 80px);
     }
 
+    /* 头部样式 */
     .header {
         text-align: center;
-        margin-bottom: 40px;
         padding: 30px 0;
-        background: linear-gradient(135deg, #2c3e50 0%, #4a6491 100%);
         color: white;
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
     }
 
     .header h1 {
         font-size: 2.5rem;
+        font-weight: bold;
         margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
 
     .header p {
-        font-size: 1.1rem;
+        font-size: 1.2rem;
         opacity: 0.9;
+        margin-bottom: 5px;
     }
 
+    /* 推荐网格样式 - 与首页完全一致 */
     .recommendations-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 25px;
         margin-bottom: 40px;
     }
 
     .book-card {
         background: white;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
         transition: all 0.3s ease;
-        position: relative;
+        border: 1px solid rgba(255,255,255,0.2);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: 320px;
     }
 
     .book-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-    }
-
-    .book-cover {
-        height: 180px;
-        background: linear-gradient(135deg, #3498db, #2c3e50);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 3rem;
-    }
-
-    .book-cover.marx {
-        background: linear-gradient(135deg, #c0392b, #2c3e50);
-    }
-
-    .book-cover.computer {
-        background: linear-gradient(135deg, #2c3e50, #3498db);
-    }
-
-    .book-info {
-        padding: 20px;
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
     }
 
     .book-title {
         font-size: 1.3rem;
         font-weight: bold;
-        margin-bottom: 10px;
         color: #2c3e50;
-        line-height: 1.3;
+        margin-bottom: 10px;
+        line-height: 1.4;
+        height: 56px;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
     }
 
-    .book-meta {
-        font-size: 0.9rem;
-        color: #666;
+    .book-author {
+        color: #7f8c8d;
+        font-size: 1rem;
         margin-bottom: 8px;
         display: flex;
         align-items: center;
     }
 
-    .book-meta i {
+    .book-author i {
         margin-right: 8px;
-        color: #3498db;
-        width: 16px;
-        text-align: center;
-    }
-
-    .book-description {
+        color: #667eea;
         font-size: 0.9rem;
-        color: #777;
-        margin: 15px 0;
-        line-height: 1.5;
-        font-style: italic;
     }
 
-    .book-stats {
+    .book-publisher, .book-category {
+        color: #5d6d7e;
+        font-size: 0.95rem;
+        margin-bottom: 8px;
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        margin-top: 15px;
+    }
+
+    .book-publisher i, .book-category i {
+        margin-right: 8px;
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+
+    .book-category {
+        margin-top: auto;
         padding-top: 15px;
         border-top: 1px solid #eee;
     }
 
-    .status-badge {
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: bold;
+    .book-status {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 
     .status-available {
-        background-color: #d4edda;
-        color: #155724;
-    }
-
-    .status-borrowed {
-        background-color: #f8d7da;
-        color: #721c24;
-    }
-
-    .borrow-btn {
-        background-color: #3498db;
-        color: white;
-        border: none;
-        padding: 8px 20px;
-        border-radius: 6px;
-        cursor: pointer;
+        color: #27ae60;
         font-weight: bold;
-        transition: background-color 0.3s;
-        width: 100%;
-        margin-top: 10px;
-    }
-
-    .borrow-btn:hover {
-        background-color: #2980b9;
-    }
-
-    .borrow-btn:disabled {
-        background-color: #95a5a6;
-        cursor: not-allowed;
-    }
-
-    .rating {
-        color: #f39c12;
-        font-weight: bold;
+        background: #d4edda;
+        padding: 5px 12px;
+        border-radius: 4px;
         font-size: 0.9rem;
     }
 
-    .borrow-count {
-        color: #7f8c8d;
-        font-size: 0.85rem;
-    }
-
-    .actions {
-        text-align: center;
-        margin-top: 40px;
-        padding-top: 30px;
-        border-top: 1px solid #ddd;
-    }
-
-    .btn {
-        display: inline-block;
-        padding: 12px 30px;
-        background-color: #2c3e50;
-        color: white;
-        text-decoration: none;
-        border-radius: 6px;
+    .status-unavailable {
+        color: #e74c3c;
         font-weight: bold;
-        margin: 0 10px;
-        transition: background-color 0.3s;
+        background: #f8d7da;
+        padding: 5px 12px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    /* 借阅按钮 - 与首页搜索按钮一致 */
+    .borrow-btn {
+        padding: 8px 20px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
         border: none;
+        border-radius: 20px;
         cursor: pointer;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
     }
 
-    .btn:hover {
-        background-color: #1a252f;
+    .borrow-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     }
 
-    .btn-primary {
-        background-color: #3498db;
+    .borrow-btn:disabled {
+        background: #95a5a6;
+        cursor: not-allowed;
+        opacity: 0.7;
     }
 
-    .btn-primary:hover {
-        background-color: #2980b9;
-    }
-
-    .loading {
+    /* 加载动画 */
+    #loading {
         text-align: center;
-        padding: 60px;
-        font-size: 1.2rem;
-        color: #7f8c8d;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 15px;
+        margin: 30px 0;
     }
 
     .loading-spinner {
+        width: 50px;
+        height: 50px;
         border: 4px solid #f3f3f3;
-        border-top: 4px solid #3498db;
+        border-top: 4px solid #667eea;
         border-radius: 50%;
-        width: 40px;
-        height: 40px;
         animation: spin 1s linear infinite;
         margin: 0 auto 20px;
     }
@@ -218,47 +190,107 @@
         100% { transform: rotate(360deg); }
     }
 
-    .no-results {
+    /* 无结果状态 */
+    #no-results {
         text-align: center;
-        padding: 60px;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 15px;
         color: #7f8c8d;
-        font-size: 1.1rem;
+        margin: 30px 0;
     }
 
-    .category-badge {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background-color: rgba(255, 255, 255, 0.9);
+    #no-results h3 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
         color: #2c3e50;
-        padding: 4px 12px;
-        border-radius: 12px;
-        font-size: 0.75rem;
-        font-weight: bold;
     }
 
-    /* 响应式调整 */
+    /* 操作按钮区域 */
+    .actions {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin: 40px 0;
+        flex-wrap: wrap;
+    }
+
+    .actions .btn {
+        padding: 12px 25px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .actions .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    /* 响应式设计 */
     @media (max-width: 768px) {
-        .recommendations-grid {
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 15px;
+        .container {
+            padding: 15px;
+        }
+
+        .header {
+            padding: 20px 0;
         }
 
         .header h1 {
             font-size: 2rem;
         }
 
-        .btn {
-            display: block;
-            margin: 10px auto;
-            width: 80%;
+        .header p {
+            font-size: 1rem;
+        }
+
+        .recommendations-grid {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .book-card {
+            padding: 20px;
+            min-height: 280px;
+        }
+
+        .book-title {
+            font-size: 1.2rem;
+            height: 50px;
+        }
+
+        .actions {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .actions .btn {
+            width: 100%;
             max-width: 300px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .recommendations-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .book-card {
+            min-height: 260px;
         }
     }
 </style>
 {% endblock %}
-
-
 
 
 
@@ -342,7 +374,7 @@
                 },
                 body: JSON.stringify({
                     user_id: userId,
-                    top_n: 12  // 获取12条推荐
+                    top_n: 9  // 获取12条推荐
                 })
             });
 
@@ -381,87 +413,114 @@
         }
     }
 
-    // 显示推荐结果
-    function displayRecommendations(books) {
-        const grid = document.getElementById('recommendations-grid');
-        grid.innerHTML = '';
 
-        books.forEach(book => {
-            // 确定封面样式
-            let coverClass = '';
-            let coverIcon = 'fa-book';
+function displayRecommendations(books) {
+    const grid = document.getElementById('recommendations-grid');
+    grid.innerHTML = '';
 
-            if (book.category && book.category.includes('马克思主义')) {
-                coverClass = 'marx';
-                coverIcon = 'fa-landmark';
-            } else if (book.category && book.category.includes('计算机')) {
-                coverClass = 'computer';
-                coverIcon = 'fa-laptop-code';
+    // 清除HTML中原来的内容
+    document.getElementById('recommendations-container').style.display = 'block';
+
+    books.forEach((book, index) => {
+        // 清理数据 - 去除多余空格和换行
+        const cleanText = (text) => {
+            if (!text) return '';
+            return text
+                .replace(/\n/g, ' ')      // 换行变空格
+                .replace(/\s+/g, ' ')     // 多个空格变一个
+                .replace(/^\s+|\s+$/g, '') // 去除首尾空格
+                .replace(/人\s*民/g, '人民') // 修复"人 民出版社"
+                .replace(/译人/g, '译');    // 修复"译人"
+        };
+
+        // 安全处理书名
+        const rawTitle = book.title || book.book_title || '';
+        const safeTitle = cleanText(rawTitle);
+
+        // 处理作者信息（可能是"中共中央马克思恩格斯列宁斯大林著作编译局译"）
+        const rawAuthor = book.author || book.writer || '';
+        let author = cleanText(rawAuthor);
+
+        // 如果作者包含"人民出版社"，可能是字段混了
+        if (author.includes('人民出版社')) {
+            // 尝试分离作者和出版社
+            const parts = author.split('人民出版社');
+            if (parts.length > 1) {
+                author = parts[0] + '译';
+                book.publisher = '人民出版社' + parts[1];
             }
+        }
 
-            // 构建描述，限制长度
-            let description = book.description || '';
-            if (description.length > 80) {
-                description = description.substring(0, 77) + '...';
+        // 处理出版社
+        const rawPublisher = book.publisher || book.publish_house || '';
+        let publisher = cleanText(rawPublisher);
+
+        // 如果出版社为空但作者包含出版社信息
+        if (!publisher && author.includes('出版社')) {
+            const match = author.match(/(.+出版社)/);
+            if (match) {
+                publisher = match[1];
+                author = author.replace(publisher, '').trim();
             }
+        }
 
-            // 安全处理书名和ID
-            const safeBookTitle = book.title ? book.title.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
-            const safeBookId = book.book_id ? book.book_id.replace(/'/g, "\\'") : (book.id || '');
+        // 处理分类
+        let category = cleanText(book.category || book.genre || '未分类');
+        // 如果分类过长，截取前20个字符
+        if (category.length > 20) {
+            category = category.substring(0, 17) + '...';
+        }
 
-            const bookCard = document.createElement('div');
-            bookCard.className = 'book-card';
+        // 处理状态
+        const status = book.status || (book.available ? '可借阅' : '已借出') || '状态未知';
 
-            bookCard.innerHTML = `
-                <div class="book-cover ${coverClass}">
-                    <i class="fas ${coverIcon}" style="font-size: 4rem;"></i>
-                </div>
+        // 图书ID
+        const bookId = book.id || book.book_id || index;
+        const safeBookTitle = safeTitle.replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
-                ${book.category ? `<div class="category-badge">${book.category}</div>` : ''}
+        // 创建卡片
+        const bookCard = document.createElement('div');
+        bookCard.className = 'book-card';
 
-                <div class="book-info">
-                    <h3 class="book-title">${book.title || '未知书名'}</h3>
+        bookCard.innerHTML = `
+            <h3 class="book-title" title="${safeTitle}">${safeTitle}</h3>
 
-                    <div class="book-meta">
-                        <i class="fas fa-user"></i>
-                        <span>${book.author || '未知作者'}</span>
-                    </div>
+            <div class="book-author">
+                <i class="fas fa-user"></i>
+                <span title="${author}">${author}</span>
+            </div>
 
-                    <div class="book-meta">
-                        <i class="fas fa-building"></i>
-                        <span>${book.publisher || '未知出版社'}</span>
-                    </div>
+            <div class="book-publisher">
+                <i class="fas fa-building"></i>
+                <span title="${publisher}">${publisher}</span>
+            </div>
 
-                    ${description ? `
-                        <div class="book-description">
-                            ${description}
-                        </div>
-                    ` : ''}
+            <div class="book-category">
+                <i class="fas fa-tag"></i>
+                <span title="${category}">${category}</span>
+            </div>
 
-                    <div class="book-stats">
-                        <div>
-                            ${book.rating ? `<span class="rating">⭐ ${book.rating}</span>` : ''}
-                            ${book.borrow_count ? `<br><span class="borrow-count">借阅 ${book.borrow_count}次</span>` : ''}
-                        </div>
+            <div class="book-status">
+                <span class="${status === '可借阅' ? 'status-available' : 'status-unavailable'}">
+                    ${status}
+                </span>
 
-                        <div>
-                            <span class="status-badge ${book.status === '可借阅' ? 'status-available' : 'status-borrowed'}">
-                                ${book.status || '状态未知'}
-                            </span>
-                        </div>
-                    </div>
+                <button onclick="borrowBook('${bookId}', '${safeBookTitle}')"
+                        class="borrow-btn"
+                        ${status !== '可借阅' ? 'disabled' : ''}>
+                    <i class="fas fa-book-reader"></i>
+                    ${status === '可借阅' ? '立即借阅' : '不可借'}
+                </button>
+            </div>
+        `;
 
-                    <button onclick="borrowBook('${book.id || book.book_id || ''}', '${safeBookTitle}', ${!book.id})"
-                            class="borrow-btn"
-                            ${book.status !== '可借阅' ? 'disabled' : ''}>
-                        <i class="fas fa-book-reader"></i> ${book.status === '可借阅' ? '立即借阅' : '不可借'}
-                    </button>
-                </div>
-            `;
+        grid.appendChild(bookCard);
+    });
+}
 
-            grid.appendChild(bookCard);
-        });
-    }
+
+
+
 
     // 刷新推荐
     function refreshRecommendations() {

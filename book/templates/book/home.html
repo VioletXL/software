@@ -191,6 +191,58 @@
         margin-bottom: 15px;
         color: #2c3e50;
     }
+    /* 用户头像样式 */
+.user-profile {
+    position: absolute;
+    top: 85px;
+    right: 110px;
+    z-index: 1000;
+}
+
+.user-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
+    background: pink;
+    color: white;
+    border-radius: 50%;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 18px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.user-avatar:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* 未登录按钮 */
+.login-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.login-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.login-btn i {
+    font-size: 16px;
+}
 
 </style>
 {% endblock %}
@@ -203,6 +255,25 @@
             <div class="brand-subtitle">Bohou distant</div>
             <div class="brand-english">share books</div>
         </div>
+
+        <!-- 在 home.html 的头部区域添加 -->
+<div class="user-profile">
+    {% if user.is_authenticated %}
+        <!-- 已登录：显示用户头像/名称 -->
+        <a href="{% url 'profile' %}" class="user-avatar">
+            {% if user.username|length > 2 %}
+                {{ user.username|slice:":2" }}  <!-- 显示前两个字符 -->
+            {% else %}
+                {{ user.username }}
+            {% endif %}
+        </a>
+    {% else %}
+        <!-- 未登录：显示登录按钮 -->
+        <a href="{% url 'login' %}" class="login-btn">
+            <i class="fas fa-user"></i> 登录
+        </a>
+    {% endif %}
+</div>
 
         <!-- 搜索区域 -->
         <div class="search-section">
@@ -247,7 +318,7 @@
                     {% else %}
                         {% if book.current_borrower == user %}
                             <button class="return-btn"
-                                    onclick="returnBook('{{ book.id }}')"
+                                    onclick="returnBook('{{ book.id }}', '{{ book.title|escapejs }}')"
                                     data-book-id="{{ book.id }}">
                                 归还图书
                             </button>
@@ -475,6 +546,8 @@ function borrowBook(bookId, bookTitle) {
         btn.disabled = true;
     }
 
+
+const returnUrl = `{% url "return_book" 0 %}`.replace('0', bookId);
     // 修正API路径：使用你的实际借阅API路径
     fetch('{% url "book_borrow" %}', {  // 确保urls.py中有这个路由
         method: 'POST',
@@ -483,7 +556,7 @@ function borrowBook(bookId, bookTitle) {
             'X-CSRFToken': getCsrfToken(),
         },
         body: JSON.stringify({
-            book_id: bookId,
+
             book_title: bookTitle
         })
     })
@@ -519,5 +592,77 @@ function borrowBook(bookId, bookTitle) {
         }
     });
 }
+
+// 归还功能 - 针对首页图书
+function returnBook(bookId, bookTitle) {
+    // 检查用户是否登录
+    {% if not user.is_authenticated %}
+        alert('请先登录后再归还图书');
+        window.location.href = '{% url "login" %}?next={{ request.path }}';
+        return;
+    {% endif %}
+
+    if (!bookId) {
+        alert('图书ID无效');
+        return;
+    }
+
+    // 弹窗确认
+    if (!confirm(`确定要归还《${bookTitle}》吗？`)) {
+        return;
+    }
+
+    // 显示加载状态
+    const btn = document.querySelector(`[data-book-id="${bookId}"]`);
+    if (btn) {
+        const originalText = btn.textContent;
+        btn.textContent = '处理中...';
+        btn.disabled = true;
+    }
+
+    // 关键修改：使用模板标签动态构建URL
+    const returnUrl = `{% url "return_book" 0 %}`.replace('0', bookId);
+
+    fetch(returnUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(),
+        },
+        body: JSON.stringify({
+            book_title: bookTitle  // 可选，用于日志记录
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP错误: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert(`成功归还《${bookTitle}》！`);
+            // 刷新当前页面
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        } else {
+            alert(`归还失败: ${data.message || '未知错误'}`);
+            if (btn) {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+    })
+    .catch(error => {
+        console.error('归还请求失败:', error);
+        alert('归还请求失败，请稍后再试');
+        if (btn) {
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
+    });
+}
+
 </script>
 {% endblock %}

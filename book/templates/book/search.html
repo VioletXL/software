@@ -1,30 +1,590 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>搜索图书</title>
-</head>
-<body>
-    <h1>🔍 图书搜索</h1>
+<!-- 在文件开头添加 -->
+{% extends 'base.html' %}
 
-    <!-- 搜索框 -->
-    <form method="get" action=".">
-        <input type="text" name="q" value="{{ query }}" placeholder="输入书名搜索...">
-        <button type="submit">搜索</button>
-    </form>
+{% block title %}搜索结果 - 博厚悠远图书分享系统{% endblock %}
 
-    {% if query %}
-        <h2>搜索 "{{ query }}" 的结果：</h2>
+{% block extra_css %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* 头部样式 */
+    .header {
+        text-align: center;
+        padding: 40px 0;
+        color: white;
+    }
+
+    .brand-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .brand-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 5px;
+    }
+
+    .brand-english {
+        font-size: 1rem;
+        opacity: 0.8;
+        font-style: italic;
+    }
+
+    /* 搜索框样式 */
+    .search-section {
+        background: rgba(255,255,255,0.95);
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+
+    .search-form {
+        display: flex;
+        gap: 10px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 12px 20px;
+        border: 2px solid #667eea;
+        border-radius: 25px;
+        font-size: 16px;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        border-color: #764ba2;
+        box-shadow: 0 0 10px rgba(118, 75, 162, 0.3);
+    }
+
+    .search-btn, .like-btn {
+        padding: 12px 30px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .search-btn:hover, .like-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    /* 搜索结果标题 */
+    .results-header {
+        margin-bottom: 30px;
+        text-align: center;
+        color: white;
+    }
+
+    .results-title {
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+    }
+
+    .results-count {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+
+    /* 图书网格样式 */
+    .books-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+
+    .book-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .book-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
+
+    .book-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        line-height: 1.4;
+    }
+
+    .book-author {
+        color: #7f8c8d;
+        font-size: 1rem;
+        margin-bottom: 10px;
+    }
+
+    .book-publisher, .book-category {
+        color: #5d6d7e;
+        font-size: 0.95rem;
+        margin-bottom: 8px;
+    }
+
+    .book-footer {
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .book-status {
+        font-size: 1rem;
+    }
+
+    .status-available {
+        color: #27ae60;
+        font-weight: bold;
+    }
+
+    .status-unavailable {
+        color: #e74c3c;
+        font-weight: bold;
+    }
+
+    /* 按钮样式 */
+    .borrow-btn, .return-btn, .borrowed-btn {
+        padding: 8px 20px;
+        border: none;
+        border-radius: 25px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 100px;
+        text-align: center;
+    }
+
+    .borrow-btn {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .borrow-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .return-btn {
+        background: linear-gradient(135deg, #f093fb, #f5576c);
+        color: white;
+    }
+
+    .return-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(240, 147, 251, 0.4);
+    }
+
+    .borrowed-btn {
+        background: #95a5a6;
+        color: white;
+        cursor: not-allowed;
+    }
+
+    /* 空状态样式 */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 15px;
+        color: #7f8c8d;
+        grid-column: 1 / -1;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        color: #2c3e50;
+    }
+
+    /* 底部样式 */
+    .footer {
+        text-align: center;
+        padding: 30px 0;
+        color: white;
+        opacity: 0.8;
+    }
+
+    .admin-link {
+        display: inline-block;
+        margin-top: 15px;
+        padding: 10px 25px;
+        background: rgba(255,255,255,0.2);
+        color: white;
+        text-decoration: none;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .admin-link:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+    }
+
+    /* 用户头像样式 */
+    .user-profile {
+        position: absolute;
+        top: 85px;
+        right: 110px;
+        z-index: 1000;
+    }
+
+    .user-avatar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100px;
+        height: 100px;
+        background: pink;
+        color: white;
+        border-radius: 50%;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 18px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .user-avatar:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* 未登录按钮 */
+    .login-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 20px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .login-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .login-btn i {
+        font-size: 16px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <!-- 头部品牌信息 -->
+        <div class="header">
+            <h1 class="brand-title">博厚悠远，分享图书</h1>
+            <div class="brand-subtitle">Bohou distant</div>
+            <div class="brand-english">share books</div>
+        </div>
+
+        <!-- 用户头像区域 -->
+        <div class="user-profile">
+            {% if user.is_authenticated %}
+                <!-- 已登录：显示用户头像/名称 -->
+                <a href="{% url 'profile' %}" class="user-avatar">
+                    {% if user.username|length > 2 %}
+                        {{ user.username|slice:":2" }}  <!-- 显示前两个字符 -->
+                    {% else %}
+                        {{ user.username }}
+                    {% endif %}
+                </a>
+            {% else %}
+                <!-- 未登录：显示登录按钮 -->
+                <a href="{% url 'login' %}" class="login-btn">
+                    <i class="fas fa-user"></i> 登录
+                </a>
+            {% endif %}
+        </div>
+
+        <!-- 搜索区域 -->
+        <div class="search-section">
+            <form method="get" action="{% url 'search' %}" class="search-form">
+                <input type="text" name="q" class="search-input"
+                       placeholder="搜索图书名称、作者..."
+                       value="{{ query|default:'' }}">
+                <button type="submit" class="search-btn">搜索</button>
+                <a href="{% url 'recommendations' %}" class="like-btn" target="_blank">猜你喜欢</a>
+                <a href="{% url 'login' %}" class="like-btn" target="_blank">登录</a>
+            </form>
+        </div>
+
+        <!-- 搜索结果标题 -->
+        <div class="results-header">
+            <h2 class="results-title">搜索结果</h2>
+            <div class="results-count">
+                {% if query %}
+                    搜索 "{{ query }}" 找到 {{ books|length }} 本书
+                {% else %}
+                    请输入搜索关键词
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 图书列表 -->
+        <div class="books-grid">
         {% if books %}
-            <ul>
             {% for book in books %}
-                <li>{{ book.title }} - {{ book.author }} - ¥{{ book.price }}</li>
+                <div class="book-card">
+                    <!-- 图书信息部分 -->
+                    <div class="book-info">
+                        <h3 class="book-title">{{ book.title }}</h3>
+                        <div class="book-author">作者：{{ book.author }}</div>
+                        <div class="book-publisher">出版社：{{ book.publisher }}</div>
+                        <div class="book-category">分类：{{ book.category_level1 }}</div>
+                    </div>
+
+                    <!-- 底部区域：状态和按钮 -->
+                    <div class="book-footer">
+                        <div class="book-status">
+                            <span class="{% if book.is_available %}status-available{% else %}status-unavailable{% endif %}">
+                                {% if book.is_available %}可借阅{% else %}已借出{% endif %}
+                            </span>
+                        </div>
+
+                        <!-- 借阅按钮 -->
+                        <div class="borrow-action">
+                            {% if book.is_available %}
+                                <button class="borrow-btn"
+                                        onclick="borrowBook('{{ book.id }}', '{{ book.title|escapejs }}')"
+                                        data-book-id="{{ book.id }}">
+                                    立即借阅
+                                </button>
+                            {% else %}
+                                {% if book.current_borrower == user %}
+                                    <button class="return-btn"
+                                            onclick="returnBook('{{ book.id }}', '{{ book.title|escapejs }}')"
+                                            data-book-id="{{ book.id }}">
+                                        归还图书
+                                    </button>
+                                {% else %}
+                                    <button class="borrowed-btn" disabled>
+                                        已借出
+                                    </button>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
             {% endfor %}
-            </ul>
         {% else %}
-            <p>没有找到相关图书</p>
+            {% if query %}
+                <div class="empty-state">
+                    <h3>未找到相关图书</h3>
+                    <p>请尝试其他关键词或浏览全部图书</p>
+                    <a href="{% url 'home' %}" class="search-btn" style="margin-top: 20px; text-decoration: none;">
+                        返回首页
+                    </a>
+                </div>
+            {% endif %}
         {% endif %}
+        </div>
+
+        <!-- 底部 -->
+        <div class="footer">
+            <p>博厚悠远图书分享系统</p>
+            <a href="/admin/" class="admin-link">进入管理后台</a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 获取CSRF token（Django需要）
+function getCsrfToken() {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfToken) {
+        return csrfToken.value;
+    }
+
+    const cookieValue = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrftoken='))
+        ?.split('=')[1];
+    return cookieValue || '';
+}
+
+// 借阅功能 - 针对搜索结果图书
+function borrowBook(bookId, bookTitle) {
+    // 检查用户是否登录
+    {% if not user.is_authenticated %}
+        alert('请先登录后再借阅图书');
+        window.location.href = '{% url "login" %}?next={{ request.path }}';
+        return;
     {% endif %}
 
-    <a href="/">返回首页</a>
-</body>
-</html>
+    if (!bookId) {
+        alert('图书ID无效');
+        return;
+    }
+
+    if (!confirm(`确定要借阅《${bookTitle}》吗？`)) {
+        return;
+    }
+
+    // 显示加载状态
+    const btn = document.querySelector(`[data-book-id="${bookId}"]`);
+    if (btn) {
+        const originalText = btn.textContent;
+        btn.textContent = '处理中...';
+        btn.disabled = true;
+    }
+
+    // 调用借阅API
+    fetch('{% url "book_borrow" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(),
+        },
+        body: JSON.stringify({
+            book_id: bookId,
+            book_title: bookTitle
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP错误: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert(`成功借阅《${bookTitle}》！`);
+            // 刷新当前页面，更新借阅状态
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        } else {
+            alert(`借阅失败: ${data.message || '未知错误'}`);
+            // 恢复按钮状态
+            if (btn) {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+    })
+    .catch(error => {
+        console.error('借阅请求失败:', error);
+        alert('借阅请求失败，请稍后再试');
+        // 恢复按钮状态
+        if (btn) {
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
+    });
+}
+
+// 归还功能 - 针对搜索结果图书
+function returnBook(bookId, bookTitle) {
+    // 检查用户是否登录
+    {% if not user.is_authenticated %}
+        alert('请先登录后再归还图书');
+        window.location.href = '{% url "login" %}?next={{ request.path }}';
+        return;
+    {% endif %}
+
+    if (!bookId) {
+        alert('图书ID无效');
+        return;
+    }
+
+    // 弹窗确认
+    if (!confirm(`确定要归还《${bookTitle}》吗？`)) {
+        return;
+    }
+
+    // 显示加载状态
+    const btn = document.querySelector(`[data-book-id="${bookId}"]`);
+    if (btn) {
+        const originalText = btn.textContent;
+        btn.textContent = '处理中...';
+        btn.disabled = true;
+    }
+
+    // 使用模板标签动态构建URL
+    const returnUrl = `{% url "return_book" 0 %}`.replace('0', bookId);
+
+    fetch(returnUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(),
+        },
+        body: JSON.stringify({
+            book_title: bookTitle  // 可选，用于日志记录
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP错误: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert(`成功归还《${bookTitle}》！`);
+            // 刷新当前页面
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        } else {
+            alert(`归还失败: ${data.message || '未知错误'}`);
+            if (btn) {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+    })
+    .catch(error => {
+        console.error('归还请求失败:', error);
+        alert('归还请求失败，请稍后再试');
+        if (btn) {
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
+    });
+}
+</script>
+{% endblock %}

@@ -63,7 +63,7 @@ class HybridRecommender:
         """加载LightFM模型"""
         try:
             model_path = 'lightfm_model.npz'
-            mapping_path = 'lightfm_model.mappings.json'
+            mapping_path = 'lightfm_model_mappings.json'
 
             if not os.path.exists(model_path) or not os.path.exists(mapping_path):
                 print("未找到LightFM模型文件")

@@ -67,5 +67,186 @@
             return cookieValue || '';
         }
     </script>
+
+
+
+<!-- 在 base.html 的底部，</body> 标签之前 -->
+<script>
+    // 全局借阅函数
+    function borrowBook(bookId, bookTitle) {
+        // 检查用户是否登录
+        {% if user.is_authenticated %}
+            // 用户已登录
+        {% else %}
+            alert('请先登录后再借阅图书');
+            window.location.href = '{% url "login" %}?next=' + encodeURIComponent(window.location.pathname);
+            return;
+        {% endif %}
+
+        if (!bookId) {
+            alert('图书ID无效');
+            return;
+        }
+
+        if (!confirm(`确定要借阅《${bookTitle}》吗？`)) {
+            return;
+        }
+
+        // 显示加载状态
+        const btn = document.querySelector(`[data-book-id="${bookId}"]`);
+        let originalHTML = '';
+        if (btn) {
+            originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 处理中...';
+            btn.disabled = true;
+        }
+
+        // 发送借阅请求
+        fetch('{% url "book_borrow" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken(),
+            },
+            body: JSON.stringify({
+                book_id: bookId,
+                book_title: bookTitle
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP错误: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('借阅响应:', data);
+
+            if (data.success) {
+                alert(`成功借阅《${bookTitle}》！`);
+                // ✅ 强制刷新页面，获取最新状态
+                setTimeout(() => {
+                    // 清除缓存刷新
+                    window.location.href = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
+                }, 500);
+            } else {
+                alert(`借阅失败: ${data.message || '未知错误'}`);
+
+                // 如果是"已被借出"错误，建议刷新
+                if (data.message && data.message.includes('已被借出')) {
+                    setTimeout(() => {
+                        if (confirm('图书可能已被其他用户借走。刷新页面查看最新状态？')) {
+                            location.reload();
+                        }
+                    }, 1000);
+                }
+
+                // 恢复按钮
+                if (btn) {
+                    btn.innerHTML = originalHTML;
+                    btn.disabled = false;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('借阅请求失败:', error);
+            alert('借阅请求失败，请稍后再试');
+            if (btn) {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }
+        });
+    }
+
+    // 全局归还函数
+    function returnBook(bookId, bookTitle) {
+        // 检查用户是否登录
+        {% if user.is_authenticated %}
+            // 用户已登录
+        {% else %}
+            alert('请先登录后再归还图书');
+            window.location.href = '{% url "login" %}?next=' + encodeURIComponent(window.location.pathname);
+            return;
+        {% endif %}
+
+        if (!bookId) {
+            alert('图书ID无效');
+            return;
+        }
+
+        if (!confirm(`确定要归还《${bookTitle}》吗？`)) {
+            return;
+        }
+
+        const btn = document.querySelector(`[data-book-id="${bookId}"]`);
+        let originalHTML = '';
+        if (btn) {
+            originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 处理中...';
+            btn.disabled = true;
+        }
+
+        // 构建归还URL
+        const returnUrl = `{% url "return_book" 0 %}`.replace('0', bookId);
+
+        fetch(returnUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken(),
+            },
+            body: JSON.stringify({
+                book_title: bookTitle
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('归还响应:', data);
+
+            if (data.success) {
+                alert(data.message || `成功归还《${bookTitle}》！`);
+                // ✅ 归还成功后也刷新页面
+                setTimeout(() => {
+                    window.location.reload(true);
+                }, 500);
+            } else {
+                alert(data.message || '归还失败');
+                if (btn) {
+                    btn.innerHTML = originalHTML;
+                    btn.disabled = false;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('归还请求失败:', error);
+            alert('归还请求失败，请稍后再试');
+            if (btn) {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }
+        });
+    }
+
+    // 全局CSRF token函数（已经存在，确保可用）
+    function getCsrfToken() {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfToken) {
+            return csrfToken.value;
+        }
+
+        const metaToken = document.querySelector('meta[name="csrf-token"]');
+        if (metaToken) {
+            return metaToken.getAttribute('content');
+        }
+
+        const cookieValue = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('csrftoken='))
+            ?.split('=')[1];
+        return cookieValue || '';
+    }
+</script>
+</body>
+</html>
 </body>
 </html>
