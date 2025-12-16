@@ -269,9 +269,12 @@
         </a>
     {% else %}
         <!-- 未登录：显示登录按钮 -->
-        <a href="{% url 'login' %}" class="login-btn">
-            <i class="fas fa-user"></i> 登录
-        </a>
+        <div class="login-prompt">
+            <a href="{% url 'login' %}" class="login-btn" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 25px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; text-decoration: none; border-radius: 25px; font-weight: 500; transition: all 0.3s ease;">
+                <i class="fas fa-user"></i> 请登录
+            </a>
+            <p style="color: white; margin-top: 8px; font-size: 14px; opacity: 0.8;">登录后可借阅图书</p>
+        </div>
     {% endif %}
 </div>
 

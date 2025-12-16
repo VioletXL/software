@@ -1,14 +1,17 @@
 # book/urls.py
 from django.urls import path
+from django.contrib.auth import views as auth_views
 from . import views
 
 urlpatterns = [
     # 基础页面
 
-    path('login/', views.login_view, name='login'),
+    #path('login/', views.login_view, name='login'),
     path('register/', views.register_view, name='register'),
-    path('logout/', views.logout_view, name='logout'),
+    #path('logout/', views.logout_view, name='logout'),
     path('profile/', views.profile, name='profile'),
+path('login/',auth_views.LoginView.as_view(template_name='book/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 
     # 功能页面
     path('search/', views.search_books, name='search'),

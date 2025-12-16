@@ -2,107 +2,503 @@
 {% extends 'base_auth.html' %}
 {% load static %}
 
-{% block title %}登录 - 图书分享系统{% endblock %}
+{% block title %}登录 - 博厚悠远图书分享系统{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 主容器 */
+    .auth-container {
+        display: flex;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    /* 左侧区域 */
+    .auth-left {
+        flex: 1;
+        padding: 60px 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-left::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    /* 品牌标识 */
+    .auth-brand {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 50px;
+    }
+
+    .auth-logo {
+        width: 60px;
+        height: 60px;
+        background: white;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: #667eea;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .auth-brand-text h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 5px;
+        letter-spacing: 1px;
+    }
+
+    .auth-brand-text p {
+        font-size: 14px;
+        opacity: 0.9;
+        font-weight: 300;
+    }
+
+    /* 欢迎内容 */
+    .auth-welcome h2 {
+        font-size: 36px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        line-height: 1.2;
+    }
+
+    .auth-welcome p {
+        font-size: 16px;
+        line-height: 1.6;
+        opacity: 0.9;
+        margin-bottom: 40px;
+        max-width: 400px;
+    }
+
+    /* 特性列表 */
+    .auth-features {
+        margin-top: 40px;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        opacity: 0.9;
+    }
+
+    .feature-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+
+    /* 右侧区域 */
+    .auth-right {
+        flex: 1;
+        padding: 80px 50px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: white;
+    }
+
+    /* 表单容器 */
+    .auth-form-container {
+        max-width: 400px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .auth-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+
+    .auth-subtitle {
+        font-size: 16px;
+        color: #7f8c8d;
+        margin-bottom: 40px;
+    }
+
+    /* 表单样式 */
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #e8e8e8;
+        border-radius: 12px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: #f9f9f9;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    /* 记住我 */
+    .remember-me {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 30px;
+    }
+
+    .remember-check {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .remember-check input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        border: 2px solid #ddd;
+        cursor: pointer;
+    }
+
+    /* 登录按钮 */
+    .login-btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .login-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    /* 链接 */
+    .auth-links {
+        text-align: center;
+        margin-top: 25px;
+    }
+
+    .auth-link {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+    .auth-link:hover {
+        color: #764ba2;
+        text-decoration: underline;
+    }
+
+    /* 分隔线 */
+    .divider {
+        display: flex;
+        align-items: center;
+        margin: 30px 0;
+        color: #95a5a6;
+    }
+
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #ecf0f1;
+    }
+
+    .divider span {
+        padding: 0 20px;
+        font-size: 14px;
+    }
+
+    /* 社交登录按钮 */
+    .social-login {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .social-btn {
+        padding: 14px;
+        border: 2px solid #e8e8e8;
+        border-radius: 12px;
+        background: white;
+        color: #2c3e50;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .social-btn:hover {
+        border-color: #667eea;
+        background: #f8f9ff;
+        transform: translateY(-2px);
+    }
+
+    .social-btn.google i {
+        color: #DB4437;
+    }
+
+    .social-btn.github i {
+        color: #333;
+    }
+
+    /* 测试账户提示 */
+    .demo-account {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin-top: 40px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .demo-account h4 {
+        font-size: 18px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .demo-account p {
+        margin: 8px 0;
+        font-size: 14px;
+        opacity: 0.9;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 992px) {
+        .auth-container {
+            flex-direction: column;
+        }
+
+        .auth-left {
+            padding: 40px 20px;
+        }
+
+        .auth-right {
+            padding: 40px 20px;
+        }
+    }
+
+    /* 错误提示 */
+    .alert {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    .alert-error {
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-    <!-- 左侧介绍 -->
+<div class="auth-container">
+    <!-- 左侧：品牌介绍 -->
     <div class="auth-left">
-        <div class="auth-logo">
-            <i class="fas fa-book"></i>
-            <div>
-                <div>博厚悠远</div>
-                <div style="font-size: 1.2rem; opacity: 0.9;">图书分享系统</div>
+        <div class="auth-brand">
+            <div class="auth-logo">
+                <i class="fas fa-book-open"></i>
+            </div>
+            <div class="auth-brand-text">
+                <h1>博厚悠远</h1>
+                <p>图书分享系统</p>
             </div>
         </div>
 
-        <h2 style="font-size: 1.8rem; margin-bottom: 20px;">欢迎回来</h2>
-        <p style="opacity: 0.9; line-height: 1.6; margin-bottom: 30px;">
-            登录您的账户，继续探索知识的海洋，发现更多精彩图书。
-        </p>
+        <div class="auth-welcome">
+            <h2>欢迎回来<br>探索知识海洋</h2>
+            <p>登录您的账户，继续探索丰富的图书世界，发现更多精彩内容，与他人分享阅读的乐趣。</p>
+        </div>
 
-        <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px; margin-top: 30px;">
-            <h4 style="margin-bottom: 15px;">测试账户</h4>
-            <p style="margin-bottom: 5px; font-size: 0.9rem;"><strong>用户名:</strong> demo_user</p>
-            <p style="font-size: 0.9rem;"><strong>密码:</strong> demo1234</p>
+        <div class="auth-features">
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div>
+                    <h4 style="margin: 0 0 5px 0;">海量图书资源</h4>
+                    <p style="margin: 0; font-size: 14px;">覆盖多个领域的精选图书</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <div>
+                    <h4 style="margin: 0 0 5px 0;">个性化推荐</h4>
+                    <p style="margin: 0; font-size: 14px;">根据兴趣智能推荐图书</p>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- 右侧登录表单 -->
+    <!-- 右侧：登录表单 -->
     <div class="auth-right">
-        <h1 class="auth-title">登录账户</h1>
-        <p class="auth-subtitle">请输入您的凭证以继续</p>
+        <div class="auth-form-container">
+            <h1 class="auth-title">登录账户</h1>
+            <p class="auth-subtitle">请输入您的凭证继续使用系统</p>
 
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
-
-        <form method="post" novalidate>
-            {% csrf_token %}
-
-            <div class="form-group">
-                <label class="form-label">用户名或邮箱</label>
-                {{ form.username }}
-                {% if form.username.errors %}
-                    <div class="text-danger" style="font-size: 0.875rem; margin-top: 5px;">
-                        {{ form.username.errors }}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
                     </div>
-                {% endif %}
-            </div>
+                {% endfor %}
+            {% endif %}
 
-            <div class="form-group">
-                <label class="form-label">密码</label>
-                {{ form.password }}
-                {% if form.password.errors %}
-                    <div class="text-danger" style="font-size: 0.875rem; margin-top: 5px;">
-                        {{ form.password.errors }}
+            {% if form.errors %}
+                <div class="alert alert-error">
+                    用户名或密码错误，请重试。
+                </div>
+            {% endif %}
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="form-label">用户名</label>
+                    <input type="text"
+                           name="username"
+                           class="form-input"
+                           placeholder="请输入用户名"
+                           required
+                           autofocus
+                           value="{{ form.username.value|default:'' }}">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">密码</label>
+                    <input type="password"
+                           name="password"
+                           class="form-input"
+                           placeholder="请输入密码"
+                           required>
+                    <div style="text-align: right; margin-top: 8px;">
+                        <a href="#" class="auth-link" style="font-size: 14px;">忘记密码？</a>
                     </div>
-                {% endif %}
-                <div style="text-align: right; margin-top: 5px;">
-                    <a href="#" style="font-size: 0.875rem; color: var(--secondary-color);">忘记密码？</a>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="rememberMe" name="remember_me">
-                    <label class="form-check-label" for="rememberMe">记住我</label>
+                <div class="remember-me">
+                    <div class="remember-check">
+                        <input type="checkbox" id="rememberMe" name="remember_me">
+                        <label for="rememberMe" style="font-size: 14px; color: #5d6d7e;">记住我</label>
+                    </div>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <button type="submit" class="btn-auth">
+                <button type="submit" class="login-btn">
                     <i class="fas fa-sign-in-alt"></i> 登录账户
                 </button>
-            </div>
 
-            <div class="auth-link">
-                还没有账户？ <a href="{% url 'register' %}">立即注册</a>
-            </div>
+                <div class="auth-links">
+                    <p style="margin: 20px 0; color: #5d6d7e;">
+                        还没有账户？
+                        <a href="{% url 'register' %}" class="auth-link">立即注册</a>
+                    </p>
+                    <p style="margin: 0; color: #5d6d7e;">
+                        或
+                        <a href="{% url 'home' %}" class="auth-link">以游客身份浏览</a>
+                    </p>
+                </div>
 
-            <div class="auth-link" style="margin-top: 10px;">
-                或 <a href="{% url 'home' %}">以游客身份浏览</a>
-            </div>
+                <div class="divider">
+                    <span>其他登录方式</span>
+                </div>
 
-            <!-- 社交登录（可选） -->
-            <div style="text-align: center; margin-top: 30px; position: relative;">
-                <hr style="border-color: #eee;">
-                <span style="background: white; padding: 0 15px; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); color: #666;">
-                    或使用其他方式登录
-                </span>
-            </div>
-
-            <div style="display: flex; gap: 15px; margin-top: 30px;">
-                <button type="button" class="btn" style="flex: 1; border: 2px solid #ddd; background: white; padding: 10px; border-radius: 10px;">
-                    <i class="fab fa-google" style="color: #DB4437;"></i> Google
-                </button>
-                <button type="button" class="btn" style="flex: 1; border: 2px solid #ddd; background: white; padding: 10px; border-radius: 10px;">
-                    <i class="fab fa-github" style="color: #333;"></i> GitHub
-                </button>
-            </div>
-        </form>
+                <div class="social-login">
+                    <button type="button" class="social-btn google">
+                        <i class="fab fa-google"></i> Google
+                    </button>
+                    <button type="button" class="social-btn github">
+                        <i class="fab fa-github"></i> GitHub
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
+</div>
+
+<script>
+// 添加简单的表单验证
+document.querySelector('form').addEventListener('submit', function(e) {
+    const username = this.querySelector('input[name="username"]');
+    const password = this.querySelector('input[name="password"]');
+
+    if (!username.value.trim()) {
+        e.preventDefault();
+        username.style.borderColor = '#e74c3c';
+        alert('请输入用户名');
+        return;
+    }
+
+    if (!password.value.trim()) {
+        e.preventDefault();
+        password.style.borderColor = '#e74c3c';
+        alert('请输入密码');
+        return;
+    }
+});
+
+// 输入时移除错误样式
+document.querySelectorAll('.form-input').forEach(input => {
+    input.addEventListener('input', function() {
+        this.style.borderColor = '#e8e8e8';
+    });
+});
+</script>
 {% endblock %}

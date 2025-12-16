@@ -42,6 +42,7 @@ except Exception as e:
 
 # 首页视图
 def home(request):
+
     # 修改后：只查询前9本图书
     books = Book.objects.all()[:9]  # 切片[:9]表示取前9条数据
     return render(request, 'book/home.html', {'books': books})

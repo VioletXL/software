@@ -2,110 +2,629 @@
 {% extends 'base_auth.html' %}
 {% load static %}
 
-{% block title %}注册 - 图书分享系统{% endblock %}
+{% block title %}注册 - 博厚悠远图书分享系统{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 复用登录页面的样式，确保一致性 */
+    .auth-container {
+        display: flex;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    .auth-left {
+        flex: 1;
+        padding: 60px 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-left::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .auth-brand {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 50px;
+    }
+
+    .auth-logo {
+        width: 60px;
+        height: 60px;
+        background: white;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: #667eea;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .auth-brand-text h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 5px;
+        letter-spacing: 1px;
+    }
+
+    .auth-brand-text p {
+        font-size: 14px;
+        opacity: 0.9;
+        font-weight: 300;
+    }
+
+    .auth-welcome h2 {
+        font-size: 36px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        line-height: 1.2;
+    }
+
+    .auth-welcome p {
+        font-size: 16px;
+        line-height: 1.6;
+        opacity: 0.9;
+        margin-bottom: 40px;
+        max-width: 400px;
+    }
+
+    .auth-features {
+        margin-top: 40px;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        opacity: 0.9;
+    }
+
+    .feature-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+
+    .auth-right {
+        flex: 1;
+        padding: 80px 50px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: white;
+    }
+
+    .auth-form-container {
+        max-width: 400px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .auth-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+
+    .auth-subtitle {
+        font-size: 16px;
+        color: #7f8c8d;
+        margin-bottom: 40px;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+    }
+
+    .form-label span {
+        color: #e74c3c;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #e8e8e8;
+        border-radius: 12px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: #f9f9f9;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    /* 密码要求列表 */
+    .password-requirements {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 10px;
+        border-left: 4px solid #667eea;
+    }
+
+    .password-requirements h6 {
+        margin: 0 0 10px 0;
+        color: #2c3e50;
+        font-size: 14px;
+    }
+
+    .requirements-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .requirements-list li {
+        font-size: 13px;
+        color: #5d6d7e;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .requirements-list li i {
+        color: #27ae60;
+        font-size: 12px;
+    }
+
+    .requirements-list li.invalid i {
+        color: #95a5a6;
+    }
+
+    /* 注册按钮 */
+    .register-btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .register-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    /* 链接 */
+    .auth-links {
+        text-align: center;
+        margin-top: 25px;
+    }
+
+    .auth-link {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+    .auth-link:hover {
+        color: #764ba2;
+        text-decoration: underline;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 992px) {
+        .auth-container {
+            flex-direction: column;
+        }
+
+        .auth-left {
+            padding: 40px 20px;
+        }
+
+        .auth-right {
+            padding: 40px 20px;
+        }
+    }
+
+    /* 错误提示 */
+    .alert {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    .alert-error {
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+
+    .alert-success {
+        background: #f0fff4;
+        color: #0d9b42;
+        border: 1px solid #c6f6d5;
+    }
+
+    /* 表单提示文字 */
+    .form-hint {
+        font-size: 12px;
+        color: #95a5a6;
+        margin-top: 5px;
+        display: block;
+    }
+
+    /* 进度条 */
+    .password-strength {
+        margin-top: 10px;
+        height: 4px;
+        background: #ecf0f1;
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
+    .strength-bar {
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+
+    .strength-weak {
+        background: #e74c3c;
+        width: 33%;
+    }
+
+    .strength-medium {
+        background: #f39c12;
+        width: 66%;
+    }
+
+    .strength-strong {
+        background: #27ae60;
+        width: 100%;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-    <!-- 左侧介绍 -->
+<div class="auth-container">
+    <!-- 左侧：品牌介绍 -->
     <div class="auth-left">
-        <div class="auth-logo">
-            <i class="fas fa-book"></i>
-            <div>
-                <div>博厚悠远</div>
-                <div style="font-size: 1.2rem; opacity: 0.9;">图书分享系统</div>
+        <div class="auth-brand">
+            <div class="auth-logo">
+                <i class="fas fa-book-open"></i>
+            </div>
+            <div class="auth-brand-text">
+                <h1>博厚悠远</h1>
+                <p>图书分享系统</p>
             </div>
         </div>
 
-        <h2 style="font-size: 1.8rem; margin-bottom: 20px;">加入我们的阅读社区</h2>
-        <p style="opacity: 0.9; line-height: 1.6; margin-bottom: 30px;">
-            发现海量图书，获取个性化推荐，与书友分享阅读心得。开启您的阅读之旅！
-        </p>
+        <div class="auth-welcome">
+            <h2>加入我们的<br>阅读社区</h2>
+            <p>发现海量图书，获取个性化推荐。注册账户，开启您的阅读之旅！</p>
+        </div>
 
-        <ul class="features-list">
-            <li><i class="fas fa-check-circle"></i> 个性化图书推荐</li>
-            <li><i class="fas fa-check-circle"></i> 百万图书资源</li>
-            <li><i class="fas fa-check-circle"></i> 智能借阅管理</li>
-            <li><i class="fas fa-check-circle"></i> 阅读社区互动</li>
-            <li><i class="fas fa-check-circle"></i> 跨平台同步</li>
-        </ul>
-    </div>
-
-    <!-- 右侧注册表单 -->
-    <div class="auth-right">
-        <h1 class="auth-title">创建账户</h1>
-        <p class="auth-subtitle">注册账户，开启您的阅读之旅</p>
-
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">
-                    {{ message }}
+        <div class="auth-features">
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-book"></i>
                 </div>
-            {% endfor %}
-        {% endif %}
-
-        <form method="post" novalidate>
-            {% csrf_token %}
-
-            <div class="form-group">
-                <label class="form-label">用户名 *</label>
-                {{ form.username }}
-                {% if form.username.errors %}
-                    <div class="text-danger" style="font-size: 0.875rem; margin-top: 5px;">
-                        {{ form.username.errors }}
-                    </div>
-                {% endif %}
-                <small class="text-muted">4-150个字符，只能包含字母、数字和@/./+/-/_</small>
+                <div>
+                    <h4 style="margin: 0 0 5px 0;">海量图书资源</h4>
+                    <p style="margin: 0; font-size: 14px;">覆盖多个领域的精选图书</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <div>
+                    <h4 style="margin: 0 0 5px 0;">个性化推荐</h4>
+                    <p style="margin: 0; font-size: 14px;">根据您的兴趣智能推荐</p>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">邮箱 *</label>
-                {{ form.email }}
-                {% if form.email.errors %}
-                    <div class="text-danger" style="font-size: 0.875rem; margin-top: 5px;">
-                        {{ form.email.errors }}
-                    </div>
-                {% endif %}
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div>
+                    <h4 style="margin: 0 0 5px 0;">借阅记录</h4>
+                    <p style="margin: 0; font-size: 14px;">管理您的图书借阅历史</p>
+                </div>
             </div>
-
-            <div class="form-group">
-                <label class="form-label">密码 *</label>
-                {{ form.password1 }}
-                {% if form.password1.errors %}
-                    <div class="text-danger" style="font-size: 0.875rem; margin-top: 5px;">
-                        {{ form.password1.errors }}
-                    </div>
-                {% endif %}
-                <small class="text-muted">
-                    <ul style="padding-left: 20px; margin-top: 5px;">
-                        <li>至少8个字符</li>
-                        <li>不能全是数字</li>
-                        <li>不能与用户名太相似</li>
-                    </ul>
-                </small>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">确认密码 *</label>
-                {{ form.password2 }}
-                {% if form.password2.errors %}
-                    <div class="text-danger" style="font-size: 0.875rem; margin-top: 5px;">
-                        {{ form.password2.errors }}
-                    </div>
-                {% endif %}
-            </div>
-
-            <div class="form-group">
-                <button type="submit" class="btn-auth">
-                    <i class="fas fa-user-plus"></i> 注册账户
-                </button>
-            </div>
-
-            <div class="auth-link">
-                已有账户？ <a href="{% url 'login' %}">立即登录</a>
-            </div>
-
-            <div class="auth-link" style="margin-top: 10px;">
-                或 <a href="{% url 'home' %}">返回首页</a>
-            </div>
-        </form>
+        </div>
     </div>
+
+    <!-- 右侧：注册表单 -->
+    <div class="auth-right">
+        <div class="auth-form-container">
+            <h1 class="auth-title">创建账户</h1>
+            <p class="auth-subtitle">填写以下信息完成注册</p>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if form.errors %}
+                <div class="alert alert-error">
+                    请检查以下错误：
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" novalidate id="registerForm">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="form-label">用户名 <span>*</span></label>
+                    <input type="text"
+                           name="username"
+                           class="form-input"
+                           placeholder="请输入用户名"
+                           required
+                           autofocus
+                           value="{{ form.username.value|default:'' }}"
+                           id="id_username">
+                    <span class="form-hint">4-150个字符，字母、数字和@/./+/-/_</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">邮箱地址 <span>*</span></label>
+                    <input type="email"
+                           name="email"
+                           class="form-input"
+                           placeholder="请输入邮箱地址"
+                           required
+                           value="{{ form.email.value|default:'' }}"
+                           id="id_email">
+                    <span class="form-hint">用于账户验证和密码重置</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">密码 <span>*</span></label>
+                    <input type="password"
+                           name="password1"
+                           class="form-input"
+                           placeholder="请输入密码"
+                           required
+                           id="id_password1">
+
+                    <div class="password-requirements">
+                        <h6>密码要求：</h6>
+                        <ul class="requirements-list" id="passwordRequirements">
+                            <li data-requirement="length" class="invalid">
+                                <i class="fas fa-circle"></i> 至少8个字符
+                            </li>
+                            <li data-requirement="number" class="invalid">
+                                <i class="fas fa-circle"></i> 包含数字
+                            </li>
+                            <li data-requirement="letter" class="invalid">
+                                <i class="fas fa-circle"></i> 包含字母
+                            </li>
+                        </ul>
+                        <div class="password-strength">
+                            <div class="strength-bar" id="passwordStrength"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">确认密码 <span>*</span></label>
+                    <input type="password"
+                           name="password2"
+                           class="form-input"
+                           placeholder="请再次输入密码"
+                           required
+                           id="id_password2">
+                    <span class="form-hint" id="passwordMatchHint"></span>
+                </div>
+
+                <button type="submit" class="register-btn" id="submitBtn">
+                    <i class="fas fa-user-plus"></i> 创建账户
+                </button>
+
+                <div class="auth-links">
+                    <p style="margin: 20px 0; color: #5d6d7e;">
+                        已有账户？
+                        <a href="{% url 'login' %}" class="auth-link">立即登录</a>
+                    </p>
+                    <p style="margin: 0; color: #5d6d7e;">
+                        或
+                        <a href="{% url 'home' %}" class="auth-link">返回首页</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// 实时密码强度检查
+document.getElementById('id_password1').addEventListener('input', function() {
+    const password = this.value;
+    const requirements = {
+        length: password.length >= 8,
+        number: /\d/.test(password),
+        letter: /[a-zA-Z]/.test(password)
+    };
+
+    let strength = 0;
+
+    // 更新要求列表
+    Object.keys(requirements).forEach(key => {
+        const item = document.querySelector(`[data-requirement="${key}"]`);
+        const icon = item.querySelector('i');
+
+        if (requirements[key]) {
+            item.classList.remove('invalid');
+            item.classList.add('valid');
+            icon.className = 'fas fa-check-circle';
+            icon.style.color = '#27ae60';
+            strength++;
+        } else {
+            item.classList.add('invalid');
+            item.classList.remove('valid');
+            icon.className = 'fas fa-circle';
+            icon.style.color = '#95a5a6';
+        }
+    });
+
+    // 更新强度条
+    const strengthBar = document.getElementById('passwordStrength');
+    strengthBar.className = 'strength-bar';
+
+    if (strength === 0) {
+        strengthBar.style.width = '0%';
+    } else if (strength === 1) {
+        strengthBar.classList.add('strength-weak');
+    } else if (strength === 2) {
+        strengthBar.classList.add('strength-medium');
+    } else if (strength === 3) {
+        strengthBar.classList.add('strength-strong');
+    }
+});
+
+// 密码匹配检查
+document.getElementById('id_password2').addEventListener('input', function() {
+    const password1 = document.getElementById('id_password1').value;
+    const password2 = this.value;
+    const hint = document.getElementById('passwordMatchHint');
+
+    if (password2 === '') {
+        hint.textContent = '';
+        hint.style.color = '';
+    } else if (password1 === password2) {
+        hint.textContent = '✓ 密码匹配';
+        hint.style.color = '#27ae60';
+    } else {
+        hint.textContent = '✗ 密码不匹配';
+        hint.style.color = '#e74c3c';
+    }
+});
+
+// 用户名实时检查
+document.getElementById('id_username').addEventListener('input', function() {
+    const username = this.value;
+    const hint = this.nextElementSibling;
+
+    if (username.length < 4) {
+        hint.textContent = '❌ 用户名至少4个字符';
+        hint.style.color = '#e74c3c';
+    } else if (username.length > 150) {
+        hint.textContent = '❌ 用户名不能超过150个字符';
+        hint.style.color = '#e74c3c';
+    } else if (!/^[\w.@+-]+$/.test(username)) {
+        hint.textContent = '❌ 只能包含字母、数字和@/./+/-/_';
+        hint.style.color = '#e74c3c';
+    } else {
+        hint.textContent = '✓ 用户名格式正确';
+        hint.style.color = '#27ae60';
+    }
+});
+
+// 表单提交验证
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    const username = document.getElementById('id_username');
+    const email = document.getElementById('id_email');
+    const password1 = document.getElementById('id_password1');
+    const password2 = document.getElementById('id_password2');
+    let hasError = false;
+
+    // 清除之前的错误样式
+    [username, email, password1, password2].forEach(input => {
+        input.style.borderColor = '#e8e8e8';
+    });
+
+    // 验证用户名
+    if (!username.value.trim()) {
+        username.style.borderColor = '#e74c3c';
+        alert('请输入用户名');
+        hasError = true;
+    }
+
+    // 验证邮箱
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email.value.trim() || !emailRegex.test(email.value)) {
+        email.style.borderColor = '#e74c3c';
+        alert('请输入有效的邮箱地址');
+        hasError = true;
+    }
+
+    // 验证密码
+    if (!password1.value.trim()) {
+        password1.style.borderColor = '#e74c3c';
+        alert('请输入密码');
+        hasError = true;
+    }
+
+    // 验证确认密码
+    if (password1.value !== password2.value) {
+        password2.style.borderColor = '#e74c3c';
+        alert('两次输入的密码不一致');
+        hasError = true;
+    }
+
+    if (hasError) {
+        e.preventDefault();
+    }
+});
+
+// 输入时移除错误样式
+document.querySelectorAll('.form-input').forEach(input => {
+    input.addEventListener('input', function() {
+        this.style.borderColor = '#e8e8e8';
+    });
+});
+</script>
 {% endblock %}

@@ -122,3 +122,25 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# settings.py
+
+# 认证重定向设置（你的部分）
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+# 会话设置（优化后）
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # 关键：浏览器关闭时过期
+
+# 强烈建议改为0，实现纯会话cookie
+SESSION_COOKIE_AGE = 0  # 改为0！这样关闭浏览器会话立即失效
+
+# 确保不延长会话
+SESSION_SAVE_EVERY_REQUEST = False
+
+# 可选额外设置，确保安全
+SESSION_COOKIE_SECURE = False  # 开发环境用False，生产环境用True（HTTPS）
+SESSION_COOKIE_HTTPONLY = True  # 防止JS访问会话cookie
+
