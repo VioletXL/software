@@ -132,10 +132,10 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 # 会话设置（优化后）
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # 关键：浏览器关闭时过期
+#SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # 关键：浏览器关闭时过期
 
 # 强烈建议改为0，实现纯会话cookie
-SESSION_COOKIE_AGE = 0  # 改为0！这样关闭浏览器会话立即失效
+#SESSION_COOKIE_AGE = 0  # 改为0！这样关闭浏览器会话立即失效
 
 # 确保不延长会话
 SESSION_SAVE_EVERY_REQUEST = False

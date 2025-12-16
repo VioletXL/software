@@ -214,7 +214,21 @@ def get_fallback_recommendations(n):
 # 猜你喜欢推荐页面
 def recommendations_page(request):
     """猜你喜欢推荐页面"""
-    return render(request, 'book/recommendations.html')
+
+    # 获取推荐图书（根据你的逻辑）
+    recommended_books = Book.objects.all()[:9]  # 示例
+
+    # 为每本书添加与首页相同的状态信息
+    for book in recommended_books:
+        # 确保有 is_available 属性
+        book.is_available = book.status == '可借阅' if hasattr(book, 'status') else True
+
+        # 确保能访问 current_borrower 关系
+        # 根据你的模型调整
+        if hasattr(book, 'borrowed') and book.borrowed:
+            book.is_available = False
+    return render(request, 'book/recommendations.html', {
+        'recommended_books': recommended_books})
 
 
 # 用户注册视图
@@ -281,7 +295,7 @@ def profile_view(request):
 
 from django.shortcuts import get_object_or_404
 from .models import Book, BorrowRecord
-@csrf_exempt
+#@csrf_exempt
 @login_required
 def borrow_book(request):
     """处理借阅请求的API"""
